@@ -126,7 +126,7 @@
     <el-dialog title="导入excel表格" v-model="importVisible" width="30%">
       <el-upload
           drag
-          action="http://localhost:8085/api/course/excel"
+          :action="uploadExcelURL"
           name="courseExcel"
           :on-success="getData"
           multiple
@@ -145,8 +145,7 @@
 </template>
 
 <script>
-import {listCourses, addCourse, deleteCourse, updateCourse} from "@/api/course";
-
+import {listCourses, addCourse, deleteCourse, updateCourse, uploadCourseExcelURL} from "@/api/course";
 export default {
   data() {
     return {
@@ -189,12 +188,17 @@ export default {
   created() {
     this.getData();
   },
+  computed: {
+    uploadExcelURL() {
+      return uploadCourseExcelURL()
+    }
+  },
   methods: {
     getData() {
       listCourses(this.query).then(res => {
         console.log(res);
         this.tableData = res.list;
-        this.pageTotal = res.pageTotal || 50;
+        this.pageTotal = res.pageTotal;
       });
     },
     // 触发搜索按钮
@@ -262,7 +266,6 @@ export default {
       this.editVisible = false;
       this.$message.success(`修改第 ${this.id_edit + 1} 行成功`);
       this.tableData.idx = this.form;
-     // this.$set(this.tableData, this.idx, this.form);
       updateCourse(this.form).then(()=>{
         this.getData();
       })
@@ -270,7 +273,6 @@ export default {
     // 分页导航
     handlePageChange(val) {
       this.query.pageIndex=val;
-      //this.$set(this.query, "pageIndex", val);
       this.getData();
     }
   }

@@ -68,6 +68,16 @@ export default {
           title: "课程信息管理"
         },
         {
+          icon: "el-icon-lx-location",
+          index: "classroom",
+          title: "教室信息管理"
+        },
+        {
+          icon: "el-icon-lx-addressbook",
+          index: "department",
+          title: "院系信息管理"
+        },
+        {
           icon: "el-icon-lx-profile",
           title: "教师信息管理",
           subs: [
@@ -98,11 +108,6 @@ export default {
               title: "学生个人信息"
             },
           ]
-        },
-        {
-          icon: "el-icon-lx-addressbook",
-          index: "department",
-          title: "院系信息管理"
         },
         {
           icon: "el-icon-lx-tag",

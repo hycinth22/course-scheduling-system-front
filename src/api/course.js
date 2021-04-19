@@ -1,4 +1,5 @@
 import request from '../utils/request';
+import {getURL} from '../utils/request';
 
 export const listCourses = query => {
     return request({
@@ -16,7 +17,6 @@ export const addCourse = course => {
     });
 };
 
-
 export const updateCourse = course => {
     return request({
         url: '/course/' + course.id,
@@ -27,7 +27,11 @@ export const updateCourse = course => {
 
 export const deleteCourse = id => {
     return request({
-        url: '/course/'+id,
+        url: '/course/' + id,
         method: 'delete',
     });
 };
+
+export const uploadCourseExcelURL = () => {
+    return getURL("/course/excel");
+}

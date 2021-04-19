@@ -232,6 +232,16 @@ const routes = [
                     /* webpackChunkName: "scheduling" */
                     "../views/scheduling.vue")
             },
+            {
+                path: "/classroom",
+                name: "classroom",
+                meta: {
+                    title: '教室管理'
+                },
+                component: () => import (
+                    /* webpackChunkName: "classroom" */
+                    "../views/classroom.vue")
+            },
         ]
     }, {
         path: "/login",
