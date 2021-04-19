@@ -30,7 +30,7 @@
         <el-table-column prop="lessons_per_week" label="每周课时"></el-table-column>
         <el-table-column prop="kind" label="课程属性"></el-table-column>
         <el-table-column prop="exam_mode" label="考核方式"></el-table-column>
-        <el-table-column prop="instruct_dept" label="开课单位"></el-table-column>
+        <el-table-column prop="founder" label="开课单位"></el-table-column>
 
 
         <el-table-column label="操作" width="180" align="center">
