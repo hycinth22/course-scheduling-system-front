@@ -3,7 +3,7 @@
         <div class="crumbs">
             <el-breadcrumb separator="/">
                 <el-breadcrumb-item>
-                    <i class="el-icon-lx-cascades"></i> 基础表格
+                    <i class="el-icon-lx-cascades"></i> 用户列表
                 </el-breadcrumb-item>
             </el-breadcrumb>
         </div>
@@ -15,12 +15,13 @@
                     class="handle-del mr10"
                     @click="delAllSelection"
                 >批量删除</el-button>
-                <el-select v-model="query.address" placeholder="地址" class="handle-select mr10">
-                    <el-option key="1" label="广东省" value="广东省"></el-option>
-                    <el-option key="2" label="湖南省" value="湖南省"></el-option>
+                <el-select v-model="query.at" placeholder="部门/班级" class="handle-select mr10">
+                    <el-option key="1" label="电信工程系" value="电信工程系"></el-option>
+                    <el-option key="2" label="电信17405" value="电信17405"></el-option>
                 </el-select>
                 <el-input v-model="query.name" placeholder="用户名" class="handle-input mr10"></el-input>
                 <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
+                <el-button type="text"  con="el-icon-add" @click="handleAdd">新增</el-button>
             </div>
             <el-table
                 :data="tableData"
@@ -33,10 +34,10 @@
                 <el-table-column type="selection" width="55" align="center"></el-table-column>
                 <el-table-column prop="id" label="ID" width="55" align="center"></el-table-column>
                 <el-table-column prop="name" label="用户名"></el-table-column>
-                <el-table-column label="账户余额">
-                    <template #default="scope">￥{{ scope.row.money }}</template>
+                <el-table-column label="所属部门/班级">
+                    <template #default="scope"> {{ scope.row.at }}</template>
                 </el-table-column>
-                <el-table-column label="头像(查看大图)" align="center">
+                <el-table-column label="头像" align="center">
                     <template #default="scope">
                         <el-image
                             class="table-td-thumb"
@@ -46,13 +47,13 @@
                     </template>
                 </el-table-column>
                 <el-table-column prop="address" label="地址"></el-table-column>
-                <el-table-column label="状态" align="center">
+                <el-table-column label="帐号状态" align="center">
                     <template #default="scope">
                         <el-tag
                             :type="
-                                scope.row.state === '成功'
+                                scope.row.state === '正常'
                                     ? 'success'
-                                    : scope.row.state === '失败'
+                                    : scope.row.state === '禁用'
                                     ? 'danger'
                                     : ''
                             "
@@ -60,7 +61,7 @@
                     </template>
                 </el-table-column>
 
-                <el-table-column prop="date" label="注册时间"></el-table-column>
+                <el-table-column prop="date" label="创建时间"></el-table-column>
                 <el-table-column label="操作" width="180" align="center">
                     <template #default="scope">
                         <el-button
@@ -106,6 +107,44 @@
                 </span>
             </template>
         </el-dialog>
+      <el-dialog title="新增教师帐号" v-model="addVisible" width="30%">
+        <el-form ref="form" :model="form" label-width="70px">
+          <el-form-item label="用户名">
+            <el-input v-model="form.name"></el-input>
+          </el-form-item>
+          <el-form-item label="密码">
+            <el-input v-model="form.pwd" show-password></el-input>
+          </el-form-item>
+          <el-form-item label="所属部门">
+            <el-input v-model="form.pwd"></el-input>
+          </el-form-item>
+        </el-form>
+        <template #footer>
+                <span class="dialog-footer">
+                    <el-button @click="addVisible = false">取 消</el-button>
+                    <el-button type="primary" @click="saveEdit">确 定</el-button>
+                </span>
+        </template>
+      </el-dialog>
+      <el-dialog title="新增学生帐号" v-model="addVisible" width="30%">
+        <el-form ref="form" :model="form" label-width="70px">
+          <el-form-item label="用户名">
+            <el-input v-model="form.name"></el-input>
+          </el-form-item>
+          <el-form-item label="密码">
+            <el-input v-model="form.pwd" show-password value="123456"></el-input>
+          </el-form-item>
+          <el-form-item label="所属班级">
+            <el-input v-model="form.class"></el-input>
+          </el-form-item>
+        </el-form>
+        <template #footer>
+                <span class="dialog-footer">
+                    <el-button @click="addVisible = false">取 消</el-button>
+                    <el-button type="primary" @click="saveEdit">确 定</el-button>
+                </span>
+        </template>
+      </el-dialog>
     </div>
 </template>
 
@@ -124,6 +163,7 @@ export default {
             tableData: [],
             multipleSelection: [],
             delList: [],
+            addVisible: false,
             editVisible: false,
             pageTotal: 0,
             form: {},
@@ -173,6 +213,9 @@ export default {
             }
             this.$message.error(`删除了${str}`);
             this.multipleSelection = [];
+        },
+        handleAdd() {
+          this.addVisible = true;
         },
         // 编辑操作
         handleEdit(index, row) {

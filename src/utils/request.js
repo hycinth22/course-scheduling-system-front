@@ -1,9 +1,10 @@
 import axios from 'axios';
 
+const devURLRoot = 'http://localhost:8085/admin';
+const prodURLRoot = 'http://localhost:8085/admin';
+const root = (process.env.NODE_ENV === 'development' ? devURLRoot : prodURLRoot);
 const service = axios.create({
-    // process.env.NODE_ENV === 'development' 来判断是否开发环境
-    // easy-mock服务挂了，暂时不使用了
-    // baseURL: 'https://www.easy-mock.com/mock/592501a391470c0ac1fab128',
+    baseURL: root,
     timeout: 5000
 });
 
@@ -31,4 +32,10 @@ service.interceptors.response.use(
     }
 );
 
+
+
 export default service;
+
+export const getURL = function (url) {
+    return root+url;
+}

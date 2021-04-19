@@ -4,7 +4,7 @@
             <el-col :span="8">
                 <el-card shadow="hover" class="mgb20" style="height:252px;">
                     <div class="user-info">
-                        <img src="../assets/img/img.jpg" class="user-avator" alt />
+                        <img src="../assets/img/img.jpg" class="user-avatar" alt />
                         <div class="user-info-cont">
                             <div class="user-info-name">{{ name }}</div>
                             <div>{{ role }}</div>
@@ -12,23 +12,27 @@
                     </div>
                     <div class="user-info-list">
                         上次登录时间：
-                        <span>2019-11-01</span>
+                        <span>2077-11-01</span>
                     </div>
                     <div class="user-info-list">
                         上次登录地点：
-                        <span>东莞</span>
+                        <span>某地</span>
                     </div>
                 </el-card>
                 <el-card shadow="hover" style="height:252px;">
                     <template #header>
                         <div class="clearfix">
-                            <span>语言详情</span>
+                            <span>当前学期</span>
                         </div>
+
                     </template>
-                    Vue
-                    <el-progress :percentage="71.3" color="#42b983"></el-progress>JavaScript
-                    <el-progress :percentage="24.1" color="#f1e05a"></el-progress>CSS
-                    <el-progress :percentage="13.7"></el-progress>HTML
+                    第15周/共18周
+                    <el-progress :percentage="71.3" color="#42b983"></el-progress>
+                    教室利用率
+                    <el-progress :percentage="24.1" color="#f1e05a"></el-progress>
+                    XXXXX
+                    <el-progress :percentage="13.7"></el-progress>
+                    XXXX
                     <el-progress :percentage="5.9" color="#f56c6c"></el-progress>
                 </el-card>
             </el-col>
@@ -40,7 +44,7 @@
                                 <i class="el-icon-user-solid grid-con-icon"></i>
                                 <div class="grid-cont-right">
                                     <div class="grid-num">1234</div>
-                                    <div>用户访问量</div>
+                                    <div>开课数量</div>
                                 </div>
                             </div>
                         </el-card>
@@ -51,7 +55,7 @@
                                 <i class="el-icon-message-solid grid-con-icon"></i>
                                 <div class="grid-cont-right">
                                     <div class="grid-num">321</div>
-                                    <div>系统消息</div>
+                                    <div>教师数量</div>
                                 </div>
                             </div>
                         </el-card>
@@ -62,7 +66,7 @@
                                 <i class="el-icon-s-goods grid-con-icon"></i>
                                 <div class="grid-cont-right">
                                     <div class="grid-num">5000</div>
-                                    <div>数量</div>
+                                    <div>学生数量</div>
                                 </div>
                             </div>
                         </el-card>
@@ -183,21 +187,21 @@ export default {
             options: {
                 type: "bar",
                 title: {
-                    text: "最近一周各品类销售图"
+                    text: "最近一周图"
                 },
                 xRorate: 25,
                 labels: ["周一", "周二", "周三", "周四", "周五"],
                 datasets: [
                     {
-                        label: "家电",
+                        label: "当天课程数",
                         data: [234, 278, 270, 190, 230]
                     },
                     {
-                        label: "百货",
+                        label: "授课教师数",
                         data: [164, 178, 190, 135, 160]
                     },
                     {
-                        label: "食品",
+                        label: "上课学生数",
                         data: [144, 198, 150, 235, 120]
                     }
                 ]
@@ -205,20 +209,20 @@ export default {
             options2: {
                 type: "line",
                 title: {
-                    text: "最近几个月各品类销售趋势图"
+                    text: "最近几个月趋势图"
                 },
                 labels: ["6月", "7月", "8月", "9月", "10月"],
                 datasets: [
                     {
-                        label: "家电",
+                        label: "当月课程数",
                         data: [234, 278, 270, 190, 230]
                     },
                     {
-                        label: "百货",
+                        label: "授课教师数",
                         data: [164, 178, 150, 135, 160]
                     },
                     {
-                        label: "食品",
+                        label: "上课学生数",
                         data: [74, 118, 200, 235, 90]
                     }
                 ]
@@ -248,9 +252,6 @@ export default {
 </script>
 
 <style scoped>
-.el-row {
-    margin-bottom: 20px;
-}
 
 .grid-content {
     display: flex;
@@ -311,7 +312,7 @@ export default {
     margin-bottom: 20px;
 }
 
-.user-avator {
+.user-avatar {
     width: 120px;
     height: 120px;
     border-radius: 50%;

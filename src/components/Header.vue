@@ -1,29 +1,29 @@
 <template>
     <div class="header">
         <!-- 折叠按钮 -->
-        <div class="collapse-btn" @click="collapseChage">
+        <div class="collapse-btn" @click="collapseChange">
             <i v-if="!collapse" class="el-icon-s-fold"></i>
             <i v-else class="el-icon-s-unfold"></i>
         </div>
-        <div class="logo">后台管理系统</div>
+        <div class="logo">课程排表系统</div>
         <div class="header-right">
             <div class="header-user-con">
                 <!-- 消息中心 -->
-                <div class="btn-bell">
-                    <el-tooltip
-                        effect="dark"
-                        :content="message?`有${message}条未读消息`:`消息中心`"
-                        placement="bottom"
-                    >
-                        <router-link to="/tabs">
-                            <i class="el-icon-bell"></i>
-                        </router-link>
-                    </el-tooltip>
-                    <span class="btn-bell-badge" v-if="message"></span>
-                </div>
+<!--                <div class="btn-bell">-->
+<!--                    <el-tooltip-->
+<!--                        effect="dark"-->
+<!--                        :content="message?`有${message}条未读消息`:`消息中心`"-->
+<!--                        placement="bottom"-->
+<!--                    >-->
+<!--                        <router-link to="/tabs">-->
+<!--                            <i class="el-icon-bell"></i>-->
+<!--                        </router-link>-->
+<!--                    </el-tooltip>-->
+<!--                    <span class="btn-bell-badge" v-if="message"></span>-->
+<!--                </div>-->
                 <!-- 用户头像 -->
-                <div class="user-avator">
-                    <img src="../assets/img/img.jpg" />
+                <div class="user-avatar">
+                    <img src="../assets/img/img.jpg" alt="user-avatar"/>
                 </div>
                 <!-- 用户名下拉菜单 -->
                 <el-dropdown class="user-name" trigger="click" @command="handleCommand">
@@ -65,19 +65,19 @@ export default {
     methods: {
         // 用户名下拉菜单选择事件
         handleCommand(command) {
-            if (command == "loginout") {
+            if (command === "loginout") {
                 localStorage.removeItem("ms_username");
                 this.$router.push("/login");
             }
         },
         // 侧边栏折叠
-        collapseChage() {
-            this.$store.commit("hadndleCollapse", !this.collapse);
+        collapseChange() {
+            this.$store.commit("handleCollapse", !this.collapse);
         }
     },
     mounted() {
         if (document.body.clientWidth < 1500) {
-            this.collapseChage();
+            this.collapseChange();
         }
     }
 };
@@ -111,40 +111,13 @@ export default {
     height: 70px;
     align-items: center;
 }
-.btn-fullscreen {
-    transform: rotate(45deg);
-    margin-right: 5px;
-    font-size: 24px;
-}
-.btn-bell,
-.btn-fullscreen {
-    position: relative;
-    width: 30px;
-    height: 30px;
-    text-align: center;
-    border-radius: 15px;
-    cursor: pointer;
-}
-.btn-bell-badge {
-    position: absolute;
-    right: 0;
-    top: -2px;
-    width: 8px;
-    height: 8px;
-    border-radius: 4px;
-    background: #f56c6c;
-    color: #fff;
-}
-.btn-bell .el-icon-bell {
-    color: #fff;
-}
 .user-name {
     margin-left: 10px;
 }
-.user-avator {
+.user-avatar {
     margin-left: 20px;
 }
-.user-avator img {
+.user-avatar img {
     display: block;
     width: 40px;
     height: 40px;
@@ -154,7 +127,5 @@ export default {
     color: #fff;
     cursor: pointer;
 }
-.el-dropdown-menu__item {
-    text-align: center;
-}
+
 </style>
