@@ -369,14 +369,16 @@ export default {
       if (!cellValue) return "";
       return cellValue.instruct.course.name + "(" + cellValue.instruct.course.kind + ")" + "\n"
           + cellValue.instruct.teacher.teacher_name + cellValue.instruct.teacher.teacher_title + "\n"
-          + cellValue.clazzroom.building + cellValue.clazzroom.room;
+          + cellValue.clazzroom.building + cellValue.clazzroom.room + "\n"
+          + "第1-" + Math.ceil(cellValue.instruct.course.lessons/cellValue.instruct.course.lessons_per_week) + "周";
     },
     formatterItemForTeacher(row, column, cellValue) {
       if (!cellValue) return "";
       return cellValue.map(function (item) {
         return item.instruct.teacher.teacher_name + item.instruct.teacher.teacher_title + "\n"
             + item.instruct.course.name + " - " + item.clazz.clazz_name + "\n"
-            + item.clazzroom.building + item.clazzroom.room;
+            + item.clazzroom.building + item.clazzroom.room + "\n"
+            + "第1-" + Math.ceil(cellValue.instruct.course.lessons/cellValue.instruct.course.lessons_per_week) + "周";
       }).join("\n\n");
     },
   },
