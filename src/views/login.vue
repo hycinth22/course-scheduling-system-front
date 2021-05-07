@@ -47,7 +47,8 @@ export default {
                 password: [
                     { required: true, message: "请输入密码", trigger: "blur" }
                 ]
-            }
+            },
+            failCnt: 0,
         };
     },
     created() {
@@ -65,7 +66,12 @@ export default {
                             localStorage.setItem("ms_username", this.param.username);
                             this.$router.push("/");
                           }else{
+                            this.failCnt++;
+                            if(this.failCnt>=3) {
+                              document.body.innerHTML='<h1>登录错误次数过多！系统已退出</h1>';
+                            }
                             this.$message.error("错误的用户名或密码");
+                            this.param.password='';
                           }
                         })
                 } else {
