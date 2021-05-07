@@ -9,7 +9,15 @@
     </div>
     <div class="container">
       <div class="handle-box">
-        <el-button type="primary" icon="el-icon-lx-add" @click="handleAdd" class="mr10" >新增</el-button>
+        <el-select v-model="query.semesterID" placeholder="选择学期" class="handle-select mr10">
+          <el-option
+              v-for="item in semesters"
+              :key="item.start_date"
+              :label="item.semester_name"
+              :value="item.start_date">
+          </el-option>
+        </el-select>
+        <el-button type="primary" icon="el-icon-lx-add" @click="handleAdd" class="mr10">新增</el-button>
         <el-input v-model="query.name" placeholder="课程编号/课程名/开课老师" class="handle-input mr10"></el-input>
         <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
         <el-button
@@ -17,7 +25,7 @@
             icon="el-icon-delete"
             class="handle-del mr10"
             @click="delAllSelection"
-        >删除
+        >批量删除
         </el-button>
       </div>
       <el-table
@@ -28,12 +36,21 @@
           header-cell-class-name="table-header"
           @selection-change="handleSelectionChange"
       >
-
         <el-table-column type="selection" width="55" align="center"></el-table-column>
-        <el-table-column prop="cid" label="课程编号" width="85" align="center"></el-table-column>
-        <el-table-column prop="cname" label="课程名"></el-table-column>
-        <el-table-column prop="tid" label="教师工号"></el-table-column>
-        <el-table-column prop="tname" label="教师姓名"></el-table-column>
+        <el-table-column prop="course.id" label="课程编号" width="85" align="center"></el-table-column>
+        <el-table-column prop="course.name" label="课程名"></el-table-column>
+        <el-table-column prop="teacher.teacher_id" label="教职工号"></el-table-column>
+        <el-table-column prop="teacher.teacher_name" label="教师姓名"></el-table-column>
+        <el-table-column label="选课信息" width="180" align="center">
+          <template #default="scope">
+            <el-button
+                type="text"
+                icon="el-icon-edit"
+                @click="handleClazz(scope.$index, scope.row)"
+            >选课信息
+            </el-button>
+          </template>
+        </el-table-column>
         <el-table-column label="操作" width="180" align="center">
           <template #default="scope">
             <el-button
@@ -81,59 +98,97 @@
                 </span>
       </template>
     </el-dialog>
+
+
+    <el-dialog :title="selClazzTitle" v-model="clazzVisible" width="640px">
+      <el-transfer
+          v-model="selected_clazz"
+          filterable
+          :filter-method="clazzFilterMethod"
+          filter-placeholder="搜索班级"
+          :data="clazzData"
+          :titles="['全部班级', '已选课班级']"
+      />
+      <template #footer>
+                <span class="dialog-footer">
+                    <el-button type="primary" @click="clazzVisible = false">确 定</el-button>
+                </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import {listInstructs} from "@/api/instruct";
+import {listInstructs, listInstructsClazzes} from "../api/instruct";
+import {listClazzes} from "../api/clazz";
+import {deleteTeacher} from "../api/teacher";
+import {listSemesters} from "../api/semester";
 
 export default {
-  name: "basetable",
   data() {
     return {
       query: {
-        address: "",
-        name: "",
+        semesterID: "",
+        search: "",
         pageIndex: 1,
         pageSize: 10
       },
+      semesters: [],
+      clazzData: [{key: "", label: "", disabled: false}],
       tableData: [],
       multipleSelection: [],
       delList: [],
       addVisible: false,
       editVisible: false,
+      clazzVisible: false,
       pageTotal: 0,
       form: {},
       idx: -1,
-      id: -1
+      id: -1,
+
+      selected_clazz: [],
+      selClazzTitle: "选课信息",
     };
   },
   created() {
     this.getData();
   },
+  watch: {
+    "query.semesterID": function()  {
+      this.loadInstruct();
+    }
+  },
   methods: {
-    // 获取 easy-mock 的模拟数据
     getData() {
-      listInstructs(this.query).then(res => {
-        console.log(res);
-        this.tableData = res.list;
-        this.pageTotal = res.pageTotal || 50;
+      listClazzes().then(res => {
+        this.clazzData = res.list.map(function (elem) {
+          return {key: elem.clazz_id, label: elem.clazz_id + " - " + elem.clazz_name, disabled: false};
+        });
+        console.log(this.clazzData);
       });
+      listSemesters().then(resp => {
+        this.semesters = resp;
+      });
+      if(this.query.semesterID) {
+        this.loadInstruct();
+      }
     },
     // 触发搜索按钮
     handleSearch() {
-      this.$set(this.query, "pageIndex", 1);
+      this.pageIndex = 1;
       this.getData();
     },
     // 删除操作
-    handleDelete(index) {
+    handleDelete(index, row) {
       // 二次确认删除
       this.$confirm("确定要删除吗？", "提示", {
         type: "warning"
       })
           .then(() => {
-            this.$message.success("删除成功");
-            this.tableData.splice(index, 1);
+            deleteTeacher(row.teacher_id).then(() => {
+              this.$message.success("删除成功");
+              this.tableData.splice(index, 1);
+            });
           })
           .catch(() => {
           });
@@ -143,14 +198,35 @@ export default {
       this.multipleSelection = val;
     },
     delAllSelection() {
-      const length = this.multipleSelection.length;
-      let str = "";
-      this.delList = this.delList.concat(this.multipleSelection);
-      for (let i = 0; i < length; i++) {
-        str += this.multipleSelection[i].name + " ";
-      }
-      this.$message.error(`删除了${str}`);
-      this.multipleSelection = [];
+      // 二次确认删除
+      this.$confirm("确定要批量删除吗？", "提示", {
+        type: "warning"
+      }).then(() => {
+        let proc = [];
+        for (let i = 0; i < this.multipleSelection.length; i++) {
+          proc.push(deleteTeacher(this.multipleSelection[i].teacher_id));
+        }
+        Promise.all(proc).then(() => {
+          this.$message.success(`删除成功`);
+          this.multipleSelection = [];
+          this.getData();
+        }).catch(() => {
+          this.$message.error(`删除出错`);
+          this.multipleSelection = [];
+          this.getData();
+        });
+      });
+    },
+    handleClazz(index, row) {
+      this.idx = index;
+      this.form = row;
+      this.selClazzTitle = "选课信息 —— " + row.course.name + "(教师：" + row.teacher.teacher_name + "）";
+      listInstructsClazzes(row.instruct_id).then(resp=>{
+        this.selected_clazz=resp.map(function (elem) {
+          return elem.clazz.clazz_id;
+        });
+      });
+      this.clazzVisible = true;
     },
     handleAdd() {
       this.addVisible = true;
@@ -165,12 +241,22 @@ export default {
     saveEdit() {
       this.editVisible = false;
       this.$message.success(`修改第 ${this.idx + 1} 行成功`);
-      this.$set(this.tableData, this.idx, this.form);
+      this.tableData[this.idx] = this.form;
     },
     // 分页导航
     handlePageChange(val) {
-      this.$set(this.query, "pageIndex", val);
+      this.query.pageIndex = val;
       this.getData();
+    },
+    clazzFilterMethod(query, item) {
+      return item.key.includes(query) || item.label.includes(query);
+    },
+    loadInstruct() {
+      listInstructs(this.query).then(res => {
+        console.log(res);
+        this.tableData = res.list;
+        this.pageTotal = res.pageTotal || 50;
+      });
     }
   }
 };

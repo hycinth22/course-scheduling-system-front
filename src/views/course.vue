@@ -204,7 +204,6 @@ export default {
     // 触发搜索按钮
     handleSearch() {
       this.query.pageIndex = 1;
-      //this.$set(this.query, "pageIndex", 1);
       this.getData();
     },
     // 删除操作
@@ -264,10 +263,10 @@ export default {
     // 保存编辑
     saveEdit() {
       this.editVisible = false;
-      this.$message.success(`修改第 ${this.id_edit + 1} 行成功`);
-      this.tableData.idx = this.form;
       updateCourse(this.form).then(()=>{
         this.getData();
+        this.$message.success(`修改第 ${this.id_edit + 1} 行成功`);
+        this.tableData.idx = this.form;
       })
     },
     // 分页导航

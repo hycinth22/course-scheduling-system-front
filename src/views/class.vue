@@ -10,10 +10,10 @@
     <div class="container">
       <div class="handle-box">
         <el-button type="primary" icon="el-icon-lx-add" @click="handleAdd" class="mr10">新增</el-button>
-        <el-select v-model="query.at" placeholder="学院" class="handle-select mr10">
-          <el-option key="1" label="电子信息工程学院" value="电子信息工程学院"></el-option>
-          <el-option key="2" label="电子信息工程学院" value="电子信息工程学院"></el-option>
-        </el-select>
+<!--        <el-select v-model="query.at" placeholder="学院" class="handle-select mr10">-->
+<!--          <el-option key="1" label="电子信息工程学院" value="电子信息工程学院"></el-option>-->
+<!--          <el-option key="2" label="电子信息工程学院" value="电子信息工程学院"></el-option>-->
+<!--        </el-select>-->
         <el-input v-model="query.name" placeholder="编号/班级名" class="handle-input mr10"></el-input>
         <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
         <el-button type="danger" icon="el-icon-delete" class="handle-del mr10" @click="delAllSelection">批量删除</el-button>
@@ -27,11 +27,10 @@
           @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="55" align="center"></el-table-column>
-        <el-table-column prop="id" label="编号" width="85" align="center"></el-table-column>
-        <el-table-column prop="college" label="所属学院"></el-table-column>
+        <el-table-column prop="clazz_id" label="编号" width="85" align="center"></el-table-column>
+        <el-table-column prop="college.college_name" label="所属学院"></el-table-column>
+        <el-table-column prop="clazz_name" label="名称"></el-table-column>
         <el-table-column prop="spec" label="所属专业"></el-table-column>
-        <el-table-column prop="name" label="名称"></el-table-column>
-
 
         <el-table-column label="操作" width="180" align="center">
           <template #default="scope">
@@ -122,15 +121,13 @@
 </template>
 
 <script>
-import {listClasses} from "../api/index";
+import {listClazzes} from "../api/clazz";
 
 export default {
-  name: "basetable",
   data() {
     return {
       query: {
-        address: "",
-        name: "",
+        search: "",
         pageIndex: 1,
         pageSize: 10
       },
@@ -151,7 +148,7 @@ export default {
   methods: {
     // 获取 easy-mock 的模拟数据
     getData() {
-      listClasses(this.query).then(res => {
+      listClazzes(this.query).then(res => {
         console.log(res);
         this.tableData = res.list;
         this.pageTotal = res.pageTotal || 50;

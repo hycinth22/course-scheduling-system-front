@@ -78,41 +78,24 @@ export default {
           title: "院系信息管理"
         },
         {
-          icon: "el-icon-lx-profile",
-          title: "教师信息管理",
-          subs: [
-            {
-              icon: "el-icon-lx-people",
-              index: "teacher",
-              title: "教师个人信息"
-            },
-            {
-              icon: "el-icon-lx-profile",
-              index: "instruct",
-              title: "教师开课"
-            },
-          ]
+          icon: "el-icon-lx-people",
+          index: "teacher",
+          title: "教师个人信息"
         },
         {
           icon: "el-icon-lx-group",
-          title: "学生信息管理",
-          subs: [
-            {
-              icon: "el-icon-lx-group",
-              index: "class",
-              title: "班级信息"
-            },
-            {
-              icon: "el-icon-lx-group",
-              index: "student",
-              title: "学生个人信息"
-            },
-          ]
+          title: "学生班级信息",
+          index: "class",
         },
         {
           icon: "el-icon-lx-tag",
           index: "term",
           title: "学期管理"
+        },
+        {
+          icon: "el-icon-lx-profile",
+          index: "instruct",
+          title: "开课与选课信息"
         },
         {
           icon: "el-icon-lx-cascades",

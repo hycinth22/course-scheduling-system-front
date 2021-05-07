@@ -2,7 +2,7 @@ import request from '../utils/request';
 
 export const listInstructs = query => {
     return request({
-        url: '/instruct',
+        url: '/instruct/list',
         method: 'get',
         params: query
     });
@@ -30,5 +30,13 @@ export const deleteInstructs = id => {
         url: '/instruct',
         method: 'delete',
         params: {"id": id}
+    });
+};
+
+export const listInstructsClazzes = instruct_id => {
+    return request({
+        url: '/instruct/clazzes',
+        method: 'get',
+        params: {"instruct_id": instruct_id}
     });
 };

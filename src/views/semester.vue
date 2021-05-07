@@ -10,10 +10,10 @@
     <div class="container">
       <div class="handle-box">
         <el-button type="primary" icon="el-icon-lx-add" @click="handleAdd" class="mr10">新增</el-button>
-        <el-checkbox v-model="query.hidePast" @click="getData" checked>隐藏已结束的学期</el-checkbox>
+        <el-checkbox v-model="hidePast" @click="getData">隐藏已结束的学期</el-checkbox>
       </div>
       <el-table
-          :data="tableData"
+          :data="filtered_data"
           border
           class="table"
           ref="multipleTable"
@@ -21,10 +21,10 @@
           @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="55" align="center"></el-table-column>
-        <el-table-column prop="id" label="ID" width="75" align="center"></el-table-column>
-        <el-table-column prop="name" label="名称"></el-table-column>
-        <el-table-column prop="startDate" label="起始日期"></el-table-column>
-        <el-table-column prop="weeks" label="周数"></el-table-column>
+<!--        <el-table-column type="index" label="序号" width="75" align="center"></el-table-column>-->
+        <el-table-column prop="semester_name" label="名称"></el-table-column>
+        <el-table-column prop="start_date" label="起始日期"></el-table-column>
+        <el-table-column prop="semester_weeks" label="周数"></el-table-column>
         <el-table-column label="操作" width="180" align="center">
           <template #default="scope">
             <el-button
@@ -43,16 +43,6 @@
           </template>
         </el-table-column>
       </el-table>
-      <div class="pagination">
-        <el-pagination
-            background
-            layout="total, prev, pager, next"
-            :current-page="query.pageIndex"
-            :page-size="query.pageSize"
-            :total="pageTotal"
-            @current-change="handlePageChange"
-        ></el-pagination>
-      </div>
     </div>
 
     <!-- 编辑弹出框 -->
@@ -92,10 +82,9 @@
 </template>
 
 <script>
-import {listTerms} from "../api/index";
+import {listSemesters} from "../api/semester";
 
 export default {
-  name: "basetable",
   data() {
     return {
       query: {
@@ -103,9 +92,14 @@ export default {
         name: "",
         pageIndex: 1,
         pageSize: 10,
-        hidePast: false,
       },
-      tableData: [],
+      data: [
+        {
+          "semester_name": "string",
+          "semester_weeks": 0,
+          "start_date": "string"
+        }
+      ],
       multipleSelection: [],
       delList: [],
       addVisible: false,
@@ -120,13 +114,22 @@ export default {
   created() {
     this.getData();
   },
+  computed: {
+    filtered_data() {
+      if(!this.hidePast) return this.data;
+      const now = Date.now();
+      return this.data.filter(function (currentValue) {
+        let date = new Date(currentValue.start_date);
+        date.setTime(date.getTime()+currentValue.semester_weeks*7*86400*1000);
+        return date > now;
+      })
+    },
+  },
   methods: {
-    // 获取 easy-mock 的模拟数据
     getData() {
-      listTerms(this.query).then(res => {
-        console.log(res);
-        this.tableData = res.list;
-        this.pageTotal = res.pageTotal || 50;
+      listSemesters(this.query).then(resp => {
+        console.log(resp);
+        this.data = resp;
       });
     },
     // 触发搜索按钮
@@ -142,7 +145,7 @@ export default {
       })
           .then(() => {
             this.$message.success("删除成功");
-            this.tableData.splice(index, 1);
+            this.data.splice(index, 1);
           })
           .catch(() => {
           });
@@ -174,7 +177,7 @@ export default {
     saveEdit() {
       this.editVisible = false;
       this.$message.success(`修改第 ${this.idx + 1} 行成功`);
-      this.$set(this.tableData, this.idx, this.form);
+      this.$set(this.data, this.idx, this.form);
     },
     // 分页导航
     handlePageChange(val) {

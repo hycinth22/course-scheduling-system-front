@@ -9,19 +9,19 @@ export const listClassrooms = query => {
     });
 };
 
-export const addClassroom = course => {
+export const addClassroom = clazzroom => {
     return request({
         url: '/clazzroom',
         method: 'post',
-        data: course
+        data: clazzroom
     });
 };
 
-export const updateClassroom = course => {
+export const updateClassroom = clazzroom => {
     return request({
-        url: '/clazzroom/' + course.id,
+        url: '/clazzroom/' + clazzroom.id,
         method: 'put',
-        data: course
+        data: clazzroom
     });
 };
 

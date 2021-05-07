@@ -9,3 +9,11 @@ export const listClazzesInCollege = (college_id) => {
         }
     });
 };
+
+export const listClazzes = query => {
+    return request({
+        url: '/clazz/list',
+        method: 'get',
+        params: query
+    });
+};

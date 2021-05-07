@@ -10,7 +10,7 @@
     <div class="container">
       <div class="handle-box">
         <el-button type="primary" icon="el-icon-lx-add" @click="handleAdd" class="mr10">新增</el-button>
-        <el-input v-model="query.name" placeholder="名称" class="handle-input mr10"></el-input>
+        <el-input v-model="query.search" placeholder="编号/名称" class="handle-input mr10"></el-input>
         <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
       </div>
       <el-table
@@ -22,8 +22,10 @@
           @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="55" align="center"></el-table-column>
-        <el-table-column prop="did" label="ID" width="75" align="center"></el-table-column>
-        <el-table-column prop="name" label="名称"></el-table-column>
+        <el-table-column prop="college.college_id" label="学院编号" width="105" align="center"></el-table-column>
+        <el-table-column prop="college.college_name" label="学院名称" width="205"></el-table-column>
+        <el-table-column prop="dept_id" label="系编号" width="75" align="center"></el-table-column>
+        <el-table-column prop="dept_name" label="系名称" width="205"></el-table-column>
         <el-table-column label="操作" width="180" align="center">
           <template #default="scope">
             <el-button
@@ -55,13 +57,29 @@
     </div>
 
     <!-- 编辑弹出框 -->
+    <el-dialog title="新增" v-model="addVisible" width="30%">
+      <el-form ref="form" :model="form" label-width="70px">
+        <el-form-item label="编号">
+          <el-input v-model="form.dept_id"></el-input>
+        </el-form-item>
+        <el-form-item label="名称">
+          <el-input v-model="form.dept_name"></el-input>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+                <span class="dialog-footer">
+                    <el-button @click="addVisible = false">取 消</el-button>
+                    <el-button type="primary" @click="saveAdd">确 定</el-button>
+                </span>
+      </template>
+    </el-dialog>
     <el-dialog title="编辑" v-model="editVisible" width="30%">
       <el-form ref="form" :model="form" label-width="70px">
         <el-form-item label="编号">
-          <el-input v-model="form.id"></el-input>
+          <el-input v-model="form.dept_id" disabled></el-input>
         </el-form-item>
         <el-form-item label="名称">
-          <el-input v-model="form.name"></el-input>
+          <el-input v-model="form.dept_name"></el-input>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -71,111 +89,135 @@
                 </span>
       </template>
     </el-dialog>
-    <el-dialog title="新增" v-model="addVisible" width="30%">
-      <el-form ref="form" :model="form" label-width="70px">
-        <el-form-item label="编号">
-          <el-input v-model="form.id"></el-input>
-        </el-form-item>
-        <el-form-item label="名称">
-          <el-input v-model="form.name"></el-input>
-        </el-form-item>
-      </el-form>
-      <template #footer>
-                <span class="dialog-footer">
-                    <el-button @click="addVisible = false">取 消</el-button>
-                    <el-button type="primary" @click="saveEdit">确 定</el-button>
-                </span>
-      </template>
-    </el-dialog>
   </div>
 </template>
 
 <script>
-import {listDepartments} from "../api/index";
+import {
+  listDepartments,
+  addDepartment,
+  updateDepartment,
+  deleteDepartment,
+  uploadDepartmentExcelURL
+} from "../api/dept";
 
 export default {
-  name: "basetable",
   data() {
     return {
       query: {
-        address: "",
-        name: "",
+        search: "",
         pageIndex: 1,
         pageSize: 10
       },
-      tableData: [],
+      tableData: [
+        {
+          "college": {
+            "college_id": "string",
+            "college_name": "string"
+          },
+          "dept_id": "string",
+          "dept_name": "string"
+        }
+      ],
       multipleSelection: [],
       delList: [],
+      pageTotal: 0,
+
+      // 弹出框状态
       addVisible: false,
       editVisible: false,
-      pageTotal: 0,
-      form: {},
-      idx: -1,
-      id: -1
+      importVisible: false,
+      form: {
+        "college": {
+          "college_id": "string",
+          "college_name": "string"
+        },
+        "dept_id": "string",
+        "dept_name": "string"
+      },
+      id_edit: null,
     };
   },
   created() {
     this.getData();
   },
+  computed: {
+    uploadExcelURL() {
+      return uploadDepartmentExcelURL()
+    }
+  },
   methods: {
-    // 获取 easy-mock 的模拟数据
     getData() {
       listDepartments(this.query).then(res => {
-        console.log(res);
         this.tableData = res.list;
-        this.pageTotal = res.pageTotal || 50;
+        this.pageTotal = res.pageTotal;
       });
     },
-    // 触发搜索按钮
     handleSearch() {
-      this.$set(this.query, "pageIndex", 1);
+      this.query.pageIndex = 1;
       this.getData();
     },
-    // 删除操作
-    handleDelete(index) {
-      // 二次确认删除
+    handleDelete(index, row) {
       this.$confirm("确定要删除吗？", "提示", {
         type: "warning"
-      })
-          .then(() => {
-            this.$message.success("删除成功");
-            this.tableData.splice(index, 1);
-          })
-          .catch(() => {
-          });
+      }).then(() => {
+        deleteDepartment(row.dept_id).then(() => {
+              this.$message.success("删除成功");
+              this.tableData.splice(index, 1);
+            }
+        )
+      });
     },
-    // 多选操作
     handleSelectionChange(val) {
       this.multipleSelection = val;
     },
     delAllSelection() {
-      const length = this.multipleSelection.length;
-      let str = "";
-      this.delList = this.delList.concat(this.multipleSelection);
-      for (let i = 0; i < length; i++) {
-        str += this.multipleSelection[i].name + " ";
-      }
-      this.$message.error(`删除了${str}`);
-      this.multipleSelection = [];
+      // 二次确认删除
+      this.$confirm("确定要批量删除吗？", "提示", {
+        type: "warning"
+      }).then(() => {
+        let proc = [];
+        for (let i = 0; i < this.multipleSelection.length; i++) {
+          proc.push(deleteDepartment(this.multipleSelection[i].dept_id));
+        }
+        Promise.all(proc).then(() => {
+          this.$message.success(`删除成功`);
+          this.multipleSelection = [];
+          this.getData();
+        }).catch(() => {
+          this.$message.error(`删除出错`);
+          this.multipleSelection = [];
+          this.getData();
+        });
+      });
     },
     handleAdd() {
+      this.form = {};
       this.addVisible = true;
     },
-    // 编辑操作
+    saveAdd() {
+      this.addVisible = false;
+      addDepartment(this.form).then((resp) => {
+        this.$message.success(`新增课程 ${resp.dept_id} 成功`);
+        this.tableData.push(this.form);
+      });
+    },
     handleEdit(index, row) {
-      this.idx = index;
+      this.id_edit = index;
       this.form = row;
       this.editVisible = true;
     },
-    // 保存编辑
     saveEdit() {
       this.editVisible = false;
-      this.$message.success(`修改第 ${this.idx + 1} 行成功`);
-      this.$set(this.tableData, this.idx, this.form);
+      this.$message.success(`修改第 ${this.id_edit + 1} 行成功`);
+      this.tableData.idx = this.form;
+      updateDepartment(this.form).then(() => {
+        this.getData();
+      })
     },
     // 分页导航
     handlePageChange(val) {
-      this.$set(this.query, "pageIndex", val);
+      this.query.pageIndex = val;
       this.getData();
     }
   }

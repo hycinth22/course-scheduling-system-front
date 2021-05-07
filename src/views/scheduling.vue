@@ -54,6 +54,7 @@
               </el-select>
             </div>
             <el-table :data="studentTableData" border class="table" ref="multipleTable"
+                      id="studentTable"
                       header-cell-class-name="table-header">
               <el-table-column type="index" label="时间段" width="95" align="center"></el-table-column>
               <el-table-column prop="1" label="周一" min-width="180" align="center"
@@ -76,6 +77,9 @@
             <el-link target="_blank" :href="downloadStudentExcel" :underline="true" icon="el-icon-lx-down" class="mr10">
               导出学生课表Excel
             </el-link>
+            <el-link href="#" @click="printStudent" :underline="true" icon="el-icon-lx-file" class="mr10">
+              打印学生课表
+            </el-link>
           </el-tab-pane>
           <el-tab-pane label="教师课表" name="second">
             <div class="handle-box">
@@ -97,7 +101,9 @@
               </el-select>
             </div>
             <el-table
-                :data="teacherTableData" border class="table" ref="multipleTable" header-cell-class-name="table-header">
+                :data="teacherTableData" border class="table" ref="multipleTable" header-cell-class-name="table-header"
+                id="teacherTable"
+            >
               <el-table-column type="index" label="时间段" width="95" align="center"></el-table-column>
               <el-table-column prop="1" label="周一" min-width="180" align="center"
                                :formatter="formatterItemForTeacher"></el-table-column>
@@ -118,6 +124,10 @@
             <el-link target="_blank" :href="downloadTeacherExcel" :underline="true" icon="el-icon-lx-down" class="mr10">
               导出教师课表Excel
             </el-link>
+            <el-link href="#" @click="printTeacher" :underline="true" icon="el-icon-lx-file" class="mr10">
+              打印教师课表
+            </el-link>
+
           </el-tab-pane>
         </el-tabs>
       </div>
@@ -127,9 +137,9 @@
         <el-button type="danger" icon="el-icon-lx-delete" @click="handleDeleteSchedule(query.scheduleID)" class="mr10">
           删除方案
         </el-button>
-        <!--        <el-checkbox v-model="form.enabled">选中</el-checkbox>-->
-        <!--        <el-checkbox v-model="form.publish" class="mr10">公布</el-checkbox>-->
-        <!--        <el-button type="primary" icon="el-icon-lx-text" @click="savePlan" class="mr10">保存</el-button>-->
+        <el-checkbox v-model="form.enabled">选中</el-checkbox>
+<!--        <el-checkbox v-model="form.publish" class="mr10">公布</el-checkbox>-->
+        <el-button type="primary" icon="el-icon-lx-text" @click="savePlan" class="mr10">保存</el-button>
       </div>
     </div>
 
@@ -375,12 +385,40 @@ export default {
     formatterItemForTeacher(row, column, cellValue) {
       if (!cellValue) return "";
       return cellValue.map(function (item) {
+        console.log(item);
         return item.instruct.teacher.teacher_name + item.instruct.teacher.teacher_title + "\n"
             + item.instruct.course.name + " - " + item.clazz.clazz_name + "\n"
             + item.clazzroom.building + item.clazzroom.room + "\n"
-            + "第1-" + Math.ceil(cellValue.instruct.course.lessons/cellValue.instruct.course.lessons_per_week) + "周";
+            + "第1-" + Math.ceil(item.instruct.course.lessons/item.instruct.course.lessons_per_week) + "周";
       }).join("\n\n");
     },
+    printStudent() {
+      this.printElem("studentTable");
+    },
+    printTeacher() {
+      this.printElem("teacherTable");
+    },
+    printElem(myDiv){
+      const newWindow = window.open("打印窗口", "_blank");
+      const docStr = document.getElementById(myDiv).innerHTML;
+      newWindow.document.write(docStr);
+      const styles = document.createElement("style");
+      styles.setAttribute('type','text/css'); //media="print"
+      styles.innerHTML=`table {
+  width: 100%;
+  font-size: 12px;
+  white-space: pre-line;
+  border-collapse: collapse;
+}
+table td, table th {
+  text-align:center;
+  border: 1px solid #ccc;
+}
+`;
+      newWindow.document.getElementsByTagName('head')[0].appendChild(styles);
+      newWindow.print();
+      newWindow.close();
+    }
   },
   computed: {
     studentTableData() {
@@ -409,7 +447,6 @@ export default {
   font-size: 14px;
   white-space: pre-line;
 }
-
 .table * {
   white-space: pre-line;
 }
@@ -417,7 +454,6 @@ export default {
 .mr10 {
   margin-right: 10px;
 }
-
 </style>
 <style>
 /* noinspection  CssUnusedSymbol */
