@@ -81,7 +81,7 @@
               打印学生课表
             </el-link>
           </el-tab-pane>
-          <el-tab-pane label="教师课表" name="second">
+          <el-tab-pane label="院系课表" name="second">
             <div class="handle-box">
               <el-select v-model="query.collegeID" placeholder="选择学院" class="handle-select mr10">
                 <el-option
@@ -122,10 +122,60 @@
             </el-table>
             <el-divider></el-divider>
             <el-link target="_blank" :href="downloadTeacherExcel" :underline="true" icon="el-icon-lx-down" class="mr10">
-              导出教师课表Excel
+              导出院系课表Excel
             </el-link>
             <el-link href="#" @click="printTeacher" :underline="true" icon="el-icon-lx-file" class="mr10">
-              打印教师课表
+              打印院系课表
+            </el-link>
+
+          </el-tab-pane>
+          <el-tab-pane label="教师课表" name="third">
+            <div class="handle-box">
+              <el-select v-model="query.collegeID" placeholder="选择学院" class="handle-select mr10">
+                <el-option
+                    v-for="item in colleges"
+                    :key="item.college_id"
+                    :label="item.college_name"
+                    :value="item.college_id">
+                </el-option>
+              </el-select>
+              <el-select v-model="query.teacherID" placeholder="选择教师" class="handle-select mr10">
+                <el-option
+                    v-for="item in teachers"
+                    :key="item.teacher_id"
+                    :label="item.teacher_id + ' ' +item.teacher_name + '(' + item.teacher_title + ')' "
+                    :value="item.teacher_id">
+                </el-option>
+              </el-select>
+            </div>
+            <el-table
+                :data="teacherPersonalTableData" border class="table" ref="multipleTable"
+                header-cell-class-name="table-header"
+                id="teacherPersonalTable"
+            >
+              <el-table-column type="index" label="时间段" width="95" align="center"></el-table-column>
+              <el-table-column prop="1" label="周一" min-width="180" align="center"
+                               :formatter="formatterItemForTeacherPersonal"></el-table-column>
+              <el-table-column prop="2" label="周二" min-width="180" align="center"
+                               :formatter="formatterItemForTeacherPersonal"></el-table-column>
+              <el-table-column prop="3" label="周三" min-width="180" align="center"
+                               :formatter="formatterItemForTeacherPersonal"></el-table-column>
+              <el-table-column prop="4" label="周四" min-width="180" align="center"
+                               :formatter="formatterItemForTeacherPersonal"></el-table-column>
+              <el-table-column prop="5" label="周五" min-width="180" align="center"
+                               :formatter="formatterItemForTeacherPersonal"></el-table-column>
+              <el-table-column prop="6" label="周六" min-width="95" align="center"
+                               :formatter="formatterItemForTeacherPersonal"></el-table-column>
+              <el-table-column prop="7" label="周日" min-width="95" align="center"
+                               :formatter="formatterItemForTeacherPersonal"></el-table-column>
+            </el-table>
+            <el-divider></el-divider>
+            <el-link target="_blank" :href="downloadTeacherPersonalExcel" :underline="true" icon="el-icon-lx-down"
+                     class="mr10">
+              导出教师个人课表Excel
+            </el-link>
+            <el-link href="#" @click="printTeacherPersonal" :underline="true" icon="el-icon-lx-file" class="mr10">
+              打印教师个人课表
             </el-link>
 
           </el-tab-pane>
@@ -138,7 +188,6 @@
           删除方案
         </el-button>
         <el-checkbox v-model="form.enabled">选中</el-checkbox>
-<!--        <el-checkbox v-model="form.publish" class="mr10">公布</el-checkbox>-->
         <el-button type="primary" icon="el-icon-lx-text" @click="savePlan" class="mr10">保存</el-button>
       </div>
     </div>
@@ -152,11 +201,13 @@ import {listSemesters} from "../api/semester";
 import {
   listSchedulesInSemester, listSchedulesItemsGroupView,
   createNewSchedule, deleteSchedule, deleteScheduleInSemester,
-  downloadStudentExcelURL, downloadTeacherExcelURL
+  downloadStudentExcelURL, downloadTeacherExcelURL, downloadTeacherPersonalExcelURL,
+    saveSelectedSchedule
 } from "../api/schduling";
 import {listColleges} from "../api/college";
 import {listClazzesInCollege} from "../api/clazz";
 import {listDepartmentsInCollege} from "../api/dept";
+import {listTeachersInCollege} from "../api/teacher";
 
 export default {
   data() {
@@ -167,6 +218,7 @@ export default {
         collegeID: null,
         clazzID: null,
         deptID: null,
+        teacherID: null,
       },
       form: {
         enabled: false,
@@ -199,6 +251,18 @@ export default {
         {
           "clazz_id": "string",
           "clazz_name": "string",
+          "college": {
+            "college_id": "string",
+            "college_name": "string"
+          }
+        }
+      ],
+      teachers: [
+        {
+          "teacher_id": "string",
+          "teacher_name": "string",
+          "teacher_title": "string",
+          "teacher_tel": "string",
           "college": {
             "college_id": "string",
             "college_name": "string"
@@ -273,6 +337,9 @@ export default {
       deptData: [
         [],
       ],  // [dept_id][timespan][week]
+      teacherPersonalData: [
+        // [teacher_id][timespan][week]
+      ],
       k: 0,
     };
   },
@@ -287,6 +354,7 @@ export default {
     "query.collegeID": function () {
       this.loadClazzes(this.query.collegeID);
       this.loadDepartments(this.query.collegeID);
+      this.loadTeachers(this.query.collegeID);
     },
     "query.scheduleID": function () {
       this.loadSchedulesItems(this.query.scheduleID);
@@ -349,8 +417,9 @@ export default {
     },
     loadSchedulesItems(scheduleID) {
       listSchedulesItemsGroupView(scheduleID).then(resp => {
-        this.clazzData = resp.by_clazz
-        this.deptData = resp.by_dept
+        this.clazzData = resp.by_clazz;
+        this.deptData = resp.by_dept;
+        this.teacherPersonalData = resp.by_teacher_personal;
       })
     },
     loadColleges() {
@@ -372,15 +441,22 @@ export default {
         this.departments = resp;
       });
     },
+    loadTeachers(collegeID) {
+      this.query.teacherID = null;
+      this.teachers = [];
+      listTeachersInCollege(collegeID).then(resp => {
+        this.teachers = resp;
+      });
+    },
     savePlan() {
-
+      saveSelectedSchedule(this.query.semesterID, this.query.scheduleID);
     },
     formatterItemForStudent(row, column, cellValue) {
       if (!cellValue) return "";
       return cellValue.instruct.course.name + "(" + cellValue.instruct.course.kind + ")" + "\n"
           + cellValue.instruct.teacher.teacher_name + cellValue.instruct.teacher.teacher_title + "\n"
           + cellValue.clazzroom.building + cellValue.clazzroom.room + "\n"
-          + "第1-" + Math.ceil(cellValue.instruct.course.lessons/cellValue.instruct.course.lessons_per_week) + "周";
+          + "第1-" + Math.ceil(cellValue.instruct.course.lessons / cellValue.instruct.course.lessons_per_week) + "周";
     },
     formatterItemForTeacher(row, column, cellValue) {
       if (!cellValue) return "";
@@ -389,8 +465,15 @@ export default {
         return item.instruct.teacher.teacher_name + item.instruct.teacher.teacher_title + "\n"
             + item.instruct.course.name + " - " + item.clazz.clazz_name + "\n"
             + item.clazzroom.building + item.clazzroom.room + "\n"
-            + "第1-" + Math.ceil(item.instruct.course.lessons/item.instruct.course.lessons_per_week) + "周";
+            + "第1-" + Math.ceil(item.instruct.course.lessons / item.instruct.course.lessons_per_week) + "周";
       }).join("\n\n");
+    },
+    formatterItemForTeacherPersonal(row, column, cellValue) {
+      if (!cellValue) return "";
+      return cellValue.instruct.course.name + "(" + cellValue.instruct.course.kind + ")" + "\n"
+          + cellValue.instruct.teacher.teacher_name + cellValue.instruct.teacher.teacher_title + "\n"
+          + cellValue.clazzroom.building + cellValue.clazzroom.room + "\n"
+          + "第1-" + Math.ceil(cellValue.instruct.course.lessons / cellValue.instruct.course.lessons_per_week) + "周";
     },
     printStudent() {
       this.printElem("studentTable");
@@ -398,13 +481,16 @@ export default {
     printTeacher() {
       this.printElem("teacherTable");
     },
-    printElem(myDiv){
+    printTeacherPersonal() {
+      this.printElem("teacherPersonalTable");
+    },
+    printElem(myDiv) {
       const newWindow = window.open("打印窗口", "_blank");
       const docStr = document.getElementById(myDiv).innerHTML;
       newWindow.document.write(docStr);
       const styles = document.createElement("style");
-      styles.setAttribute('type','text/css'); //media="print"
-      styles.innerHTML=`table {
+      styles.setAttribute('type', 'text/css'); //media="print"
+      styles.innerHTML = `table {
   width: 100%;
   font-size: 12px;
   white-space: pre-line;
@@ -427,11 +513,17 @@ table td, table th {
     teacherTableData() {
       return this.deptData[this.query.deptID];
     },
+    teacherPersonalTableData() {
+      return this.teacherPersonalData[this.query.teacherID];
+    },
     downloadStudentExcel() {
       return downloadStudentExcelURL(this.query.scheduleID, this.query.collegeID)
     },
     downloadTeacherExcel() {
       return downloadTeacherExcelURL(this.query.scheduleID, this.query.collegeID)
+    },
+    downloadTeacherPersonalExcel() {
+      return downloadTeacherPersonalExcelURL(this.query.scheduleID, this.query.teacherID)
     },
   }
 };
@@ -447,6 +539,7 @@ table td, table th {
   font-size: 14px;
   white-space: pre-line;
 }
+
 .table * {
   white-space: pre-line;
 }

@@ -30,3 +30,13 @@ export const deleteTeacher = id => {
         method: 'delete',
     });
 };
+
+export const listTeachersInCollege = (college_id) => {
+    return request({
+        url: '/teacher/list',
+        method: 'get',
+        params: {
+            college_id: college_id
+        }
+    });
+};

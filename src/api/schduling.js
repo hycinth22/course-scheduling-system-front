@@ -63,3 +63,18 @@ export const downloadStudentExcelURL = (schedule_id, college_id) => {
 export const downloadTeacherExcelURL = (schedule_id, college_id) => {
     return getURL('/schedule/' + schedule_id + "/teacher_excel?college_id=" + college_id);
 };
+
+export const downloadTeacherPersonalExcelURL = (schedule_id, teacher_id) => {
+    return getURL('/schedule/' + schedule_id + "/teacher_personal_excel/?teacher_id=" + teacher_id);
+};
+
+export const saveSelectedSchedule = (semester_date, schedule_id) => {
+    return request({
+        url: '/schedule/selected',
+        method: 'put',
+        params: {
+            semester: semester_date,
+            schedule: schedule_id,
+        },
+    });
+};

@@ -52,7 +52,11 @@ export default {
         };
     },
     created() {
-        this.$store.commit("clearTags");
+      if (localStorage.getItem("ms_username")!==null) {
+        this.$router.push("/");
+        return;
+      }
+      this.$store.commit("clearTags");
     },
     methods: {
         submitForm() {
@@ -63,7 +67,9 @@ export default {
                           console.log(resp);
                           if(resp.code===0) {
                             this.$message.success("登录成功");
-                            localStorage.setItem("ms_username", this.param.username);
+                            localStorage.setItem("ms_username", resp.profile.username);
+                            localStorage.setItem("ms_userprofile", JSON.stringify(resp.profile));
+                            //localStorage.setItem("ms_userprofile", resp.profile);
                             this.$router.push("/");
                           }else{
                             this.failCnt++;
