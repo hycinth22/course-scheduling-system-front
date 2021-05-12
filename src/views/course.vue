@@ -79,6 +79,9 @@
         <el-form-item label="每周学时">
           <el-input v-model.number="form.lessons_per_week"></el-input>
         </el-form-item>
+        <el-form-item label="课程属性">
+          <el-input v-model="form.kind"></el-input>
+        </el-form-item>
         <el-form-item label="考核方式">
           <el-input v-model="form.exam_mode"></el-input>
         </el-form-item>
@@ -107,6 +110,9 @@
         </el-form-item>
         <el-form-item label="每周学时">
           <el-input v-model.number="form.lessons_per_week"></el-input>
+        </el-form-item>
+        <el-form-item label="课程属性">
+          <el-input v-model="form.kind"></el-input>
         </el-form-item>
         <el-form-item label="考核方式">
           <el-input v-model="form.exam_mode"></el-input>

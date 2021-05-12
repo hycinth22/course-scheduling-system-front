@@ -74,18 +74,24 @@ export default {
         },
         {
           icon: "el-icon-lx-addressbook",
-          index: "department",
-          title: "院系信息管理"
-        },
-        {
-          icon: "el-icon-lx-people",
-          index: "teacher",
-          title: "教师个人信息"
-        },
-        {
-          icon: "el-icon-lx-group",
-          title: "学生班级信息",
-          index: "class",
+          title: "师生信息管理",
+          subs: [
+            {
+              icon: "el-icon-lx-addressbook",
+              index: "department",
+              title: "院系信息管理"
+            },
+            {
+              icon: "el-icon-lx-people",
+              index: "teacher",
+              title: "教师个人信息"
+            },
+            {
+              icon: "el-icon-lx-group",
+              title: "学生班级信息",
+              index: "class",
+            },
+          ]
         },
         {
           icon: "el-icon-lx-tag",
