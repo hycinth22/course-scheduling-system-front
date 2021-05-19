@@ -33,6 +33,7 @@
       <div class="">
         <p>方案查看区</p>
         <br>
+        <p>方案 {{query.scheduleID}} 的分数为：{{ planScore.toFixed(3) }}（越低表示越好）</p>
         <el-tabs tab-position="left">
           <el-tab-pane label="学生课表" name="first">
             <div class="handle-box">
@@ -220,6 +221,7 @@ export default {
         deptID: null,
         teacherID: null,
       },
+      planScore: 0.0,
       form: {
         enabled: false,
         publish: false,
@@ -417,9 +419,10 @@ export default {
     },
     loadSchedulesItems(scheduleID) {
       listSchedulesItemsGroupView(scheduleID).then(resp => {
-        this.clazzData = resp.by_clazz;
-        this.deptData = resp.by_dept;
-        this.teacherPersonalData = resp.by_teacher_personal;
+        this.planScore = resp.score;
+        this.clazzData = resp.items.by_clazz;
+        this.deptData = resp.items.by_dept;
+        this.teacherPersonalData = resp.items.by_teacher_personal;
       })
     },
     loadColleges() {
