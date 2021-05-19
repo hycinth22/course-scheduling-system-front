@@ -37,3 +37,14 @@ export default {
     }
 };
 </script>
+
+
+<style>
+.content {
+  /*background: url("/images/campus11.jpg") no-repeat fixed center;*/
+  background-size: cover;
+}
+.crumbs span {
+  color: white !important;
+}
+</style>

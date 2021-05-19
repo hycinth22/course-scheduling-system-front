@@ -1,8 +1,8 @@
 <template>
-  <div>
+  <div id="dashboard">
     <el-row :gutter="20">
       <el-col :span="8">
-        <el-card shadow="hover" class="mgb20" style="height:252px;">
+        <el-card shadow="hover" class="mgb20 user-info-card" style="height:252px;">
           <div class="user-info">
             <img src="../assets/img/img.jpg" class="user-avatar" alt/>
             <div class="user-info-cont">
@@ -16,7 +16,7 @@
           </div>
           <div class="user-info-list">
             上次登录地点：
-            <span>{{ user.lastLoc?user.lastLoc:"中国" }}</span>
+            <span>{{ user.lastLoc ? user.lastLoc : "中国" }}</span>
           </div>
         </el-card>
         <el-card shadow="hover" style="height:252px;">
@@ -44,8 +44,8 @@
               <div class="grid-content grid-con-1">
                 <i class="el-icon-user-solid grid-con-icon"></i>
                 <div class="grid-cont-right">
-                  <div class="grid-num">{{ counts.lessons }}</div>
-                  <div>开课数量</div>
+                  <div class="grid-num">{{ counts.teachers }}</div>
+                  <div>教师数量</div>
                 </div>
               </div>
             </el-card>
@@ -55,8 +55,8 @@
               <div class="grid-content grid-con-2">
                 <i class="el-icon-message-solid grid-con-icon"></i>
                 <div class="grid-cont-right">
-                  <div class="grid-num">{{ counts.teachers }}</div>
-                  <div>教师数量</div>
+                  <div class="grid-num">{{ counts.lessons }}</div>
+                  <div>开课数量</div>
                 </div>
               </div>
             </el-card>
@@ -64,7 +64,7 @@
           <el-col :span="8">
             <el-card shadow="hover" :body-style="{ padding: '0px' }">
               <div class="grid-content grid-con-3">
-                <i class="el-icon-s-goods grid-con-icon"></i>
+                <i class="el-icon-s-flag grid-con-icon"></i>
                 <div class="grid-cont-right">
                   <div class="grid-num">{{ counts.clazzes }}</div>
                   <div>班级数量</div>
@@ -109,35 +109,24 @@
       </el-col>
     </el-row>
     <el-row :gutter="20">
-      <el-col :span="12">
-        <el-card shadow="hover">
-          <schart ref="bar" class="schart" canvasId="bar" :options="options"></schart>
-        </el-card>
-      </el-col>
-      <el-col :span="12">
-        <el-card shadow="hover">
-          <schart ref="line" class="schart" canvasId="line" :options="options2"></schart>
-        </el-card>
-      </el-col>
+      <img class="bg" src="../assets/img/w.png" alt="decoration" />
     </el-row>
   </div>
 </template>
 
 <script>
-import Schart from "vue-schart";
-
 export default {
   name: "dashboard",
   data() {
     return {
       counts: {
-        lessons: 58,
-        teachers: 20,
-        clazzes: 500,
+        lessons: 78,
+        teachers: 30,
+        clazzes: 10,
       },
       user: {
         name: localStorage.getItem("ms_username"),
-        role: "超级管理员",
+        role: "系统管理员",
         lastTime: "2077-11-01",
         lastLoc: "某地",
       },
@@ -157,107 +146,32 @@ export default {
       },
       todoList: [
         {
-          title: "今天要修复100个bug",
-          status: false
-        },
-        {
-          title: "今天要修复100个bug",
-          status: false
-        },
-        {
-          title: "今天要写100行代码加几个bug吧",
-          status: false
-        },
-        {
-          title: "今天要修复100个bug",
-          status: false
-        },
-        {
-          title: "今天要修复100个bug",
+          title: "录入课程信息",
           status: true
         },
         {
-          title: "今天要写100行代码加几个bug吧",
+          title: "录入教室信息",
           status: true
+        },
+        {
+          title: "录入师生信息",
+          status: true
+        },
+        {
+          title: "录入开课选课信息",
+          status: false
+        },
+        {
+          title: "制定备选方案",
+          status: false
+        },
+        {
+          title: "选择方案与公布",
+          status: false
         }
       ],
-      data: [
-        {
-          name: "2018/09/04",
-          value: 1083
-        },
-        {
-          name: "2018/09/05",
-          value: 941
-        },
-        {
-          name: "2018/09/06",
-          value: 1139
-        },
-        {
-          name: "2018/09/07",
-          value: 816
-        },
-        {
-          name: "2018/09/08",
-          value: 327
-        },
-        {
-          name: "2018/09/09",
-          value: 228
-        },
-        {
-          name: "2018/09/10",
-          value: 1065
-        }
-      ],
-      options: {
-        type: "bar",
-        title: {
-          text: "最近一周图"
-        },
-        xRorate: 25,
-        labels: ["周一", "周二", "周三", "周四", "周五"],
-        datasets: [
-          {
-            label: "当天课程数",
-            data: [234, 278, 270, 190, 230]
-          },
-          {
-            label: "授课教师数",
-            data: [164, 178, 190, 135, 160]
-          },
-          {
-            label: "上课学生数",
-            data: [144, 198, 150, 235, 120]
-          }
-        ]
-      },
-      options2: {
-        type: "line",
-        title: {
-          text: "最近几个月趋势图"
-        },
-        labels: ["6月", "7月", "8月", "9月", "10月"],
-        datasets: [
-          {
-            label: "当月课程数",
-            data: [234, 278, 270, 190, 230]
-          },
-          {
-            label: "授课教师数",
-            data: [164, 178, 150, 135, 160]
-          },
-          {
-            label: "上课学生数",
-            data: [74, 118, 200, 235, 90]
-          }
-        ]
-      }
+
     };
-  },
-  components: {
-    Schart
   },
   created() {
     this.user = JSON.parse(localStorage.getItem("ms_userprofile"));
@@ -265,8 +179,9 @@ export default {
   computed: {
     role_str() {
       const table = {
-        "admin": "教务管理",
-        "teacher" : "教师",
+        "admin": "系统管理员",
+        "operator": "教务管理",
+        "teacher": "教师",
       };
       return table[this.user.role] ? table[this.user.role] : "普通用户";
     }
@@ -387,8 +302,9 @@ export default {
   color: #999;
 }
 
-.schart {
+.bg {
   width: 100%;
-  height: 300px;
+  height: auto;
 }
+
 </style>

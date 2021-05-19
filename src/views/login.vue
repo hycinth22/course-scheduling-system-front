@@ -1,135 +1,160 @@
 <template>
-    <div class="login-wrap">
-        <div class="ms-login">
-            <div class="ms-title">课程排表系统</div>
-            <el-form :model="param" :rules="rules" ref="login" label-width="0px" class="ms-content">
-                <el-form-item prop="username">
-                    <el-input v-model="param.username" placeholder="username">
-                        <template #prepend>
-                            <el-button icon="el-icon-user"></el-button>
-                        </template>
-                    </el-input>
-                </el-form-item>
-                <el-form-item prop="password">
-                    <el-input
-                        type="password"
-                        placeholder="password"
-                        v-model="param.password"
-                        @keyup.enter="submitForm()"
-                    >
-                        <template #prepend>
-                            <el-button icon="el-icon-lock"></el-button>
-                        </template>
-                    </el-input>
-                </el-form-item>
-                <div class="login-btn">
-                    <el-button type="primary" @click="submitForm()">登录</el-button>
-                </div>
-                <p class="login-tips">Tips : 密码默认为123456。</p>
-            </el-form>
+  <div class="login-wrap">
+    <div class="ms-login">
+      <div class="ms-title">课程排表系统</div>
+      <el-form :model="param" :rules="rules" ref="login" label-width="0px" class="ms-content" id="loginForm">
+        <el-form-item prop="username">
+          <el-input v-model="param.username" placeholder="username">
+            <template #prepend>
+              <el-button icon="el-icon-user"></el-button>
+            </template>
+          </el-input>
+        </el-form-item>
+        <el-form-item prop="password">
+          <el-input
+              type="password"
+              placeholder="password"
+              v-model="param.password"
+              @keyup.enter="submitForm()"
+          >
+            <template #prepend>
+              <el-button icon="el-icon-lock"></el-button>
+            </template>
+          </el-input>
+        </el-form-item>
+        <div class="login-btn">
+          <el-button type="primary" @click="submitForm()">登录</el-button>
         </div>
+        <p class="login-tips">Tips : 密码默认为123456。</p>
+      </el-form>
     </div>
+  </div>
 </template>
 
 <script>
 import {login} from "@/api/login"
+
 export default {
-    data() {
-        return {
-            param: {
-                username: "admin",
-                password: ""
-            },
-            rules: {
-                username: [
-                    { required: true, message: "请输入用户名", trigger: "blur" }
-                ],
-                password: [
-                    { required: true, message: "请输入密码", trigger: "blur" }
-                ]
-            },
-            failCnt: 0,
-        };
-    },
-    created() {
-      if (localStorage.getItem("ms_username")!==null) {
-        this.$router.push("/");
-        return;
-      }
-      this.$store.commit("clearTags");
-    },
-    methods: {
-        submitForm() {
-            this.$refs.login.validate(valid => {
-                if (valid) {
-                    login({username: this.param.username, password: this.param.password})
-                        .then((resp)=>{
-                          console.log(resp);
-                          if(resp.code===0) {
-                            this.$message.success("登录成功");
-                            localStorage.setItem("ms_username", resp.profile.username);
-                            localStorage.setItem("ms_userprofile", JSON.stringify(resp.profile));
-                            //localStorage.setItem("ms_userprofile", resp.profile);
-                            this.$router.push("/");
-                          }else{
-                            this.failCnt++;
-                            if(this.failCnt>=3) {
-                              document.body.innerHTML='<h1>登录错误次数过多！系统已退出</h1>';
-                            }
-                            this.$message.error("错误的用户名或密码");
-                            this.param.password='';
-                          }
-                        })
-                } else {
-                    this.$message.error("请输入账号和密码");
-                    return false;
-                }
-            });
-        }
+  data() {
+    return {
+      param: {
+        username: "admin",
+        password: ""
+      },
+      rules: {
+        username: [
+          {required: true, message: "请输入用户名", trigger: "blur"}
+        ],
+        password: [
+          {required: true, message: "请输入密码", trigger: "blur"}
+        ]
+      },
+      failCnt: 0,
+    };
+  },
+  created() {
+    if (localStorage.getItem("ms_username") !== null) {
+      this.$router.push("/");
+      return;
     }
+    this.$store.commit("clearTags");
+  },
+  methods: {
+    submitForm() {
+      this.$refs.login.validate(valid => {
+        if (valid) {
+          if (process.env.NODE_ENV === 'development' && this.param.username === "test") {
+            localStorage.setItem("ms_username", "test");
+            localStorage.setItem("ms_userprofile", JSON.stringify({role: "admin"}));
+            this.$router.push("/");
+            return;
+          }
+          login({username: this.param.username, password: this.param.password})
+              .then((resp) => {
+                console.log(resp);
+                if (resp.code === 0) {
+                  this.$message.success("登录成功");
+                  localStorage.setItem("ms_username", resp.profile.username);
+                  localStorage.setItem("ms_userprofile", JSON.stringify(resp.profile));
+                  //localStorage.setItem("ms_userprofile", resp.profile);
+                  this.$router.push("/");
+                } else {
+                  this.failCnt++;
+                  if (this.failCnt >= 3) {
+                    let countdown = 10;
+                    document.querySelector("#loginForm").innerHTML = '<h1>登录错误次数过多！系统已锁定10秒。' +
+                        '请在<span id="countdown" style="color: red;">' + countdown + '</span>秒后重试</h1>';
+                    const elem = document.querySelector("#countdown");
+                    setInterval(() => {
+                      countdown--;
+                      if (countdown === 0) {
+                        document.location.reload();
+                      }
+                      elem.innerHTML = countdown.toString();
+                    }, 1000);
+                  }
+                  this.$message.error("错误的用户名或密码");
+                  this.param.password = '';
+                }
+              })
+        } else {
+          this.$message.error("请输入账号和密码");
+          return false;
+        }
+      });
+    }
+  }
 };
 </script>
 
 <style scoped>
 .login-wrap {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    background-image: url(../assets/img/login-bg.jpg);
-    background-size: 100%;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  /*background-image: url(../assets/img/login-bg.jpg);*/
+  background-image: url(../assets/img/campus11.jpg);
+  background-size: cover;
+  background-repeat: no-repeat;
 }
+
 .ms-title {
-    width: 100%;
-    line-height: 50px;
-    text-align: center;
-    font-size: 20px;
-    color: #fff;
-    border-bottom: 1px solid #ddd;
+  width: 100%;
+  line-height: 50px;
+  text-align: center;
+  font-size: 20px;
+  color: #fff;
+  border-bottom: 1px solid #ddd;
 }
+
 .ms-login {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 350px;
-    margin: -190px 0 0 -175px;
-    border-radius: 5px;
-    background: rgba(255, 255, 255, 0.3);
-    overflow: hidden;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 350px;
+  margin: -190px 0 0 -175px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.3);
+  overflow: hidden;
 }
+
 .ms-content {
-    padding: 30px 30px;
+  padding: 30px 30px;
 }
+
 .login-btn {
-    text-align: center;
+  text-align: center;
 }
+
 .login-btn button {
-    width: 100%;
-    height: 36px;
-    margin-bottom: 10px;
+  width: 100%;
+  height: 36px;
+  margin-bottom: 10px;
 }
+
 .login-tips {
-    font-size: 12px;
-    line-height: 30px;
-    color: #fff;
+  font-size: 12px;
+  line-height: 30px;
+  color: #fff;
 }
 </style>

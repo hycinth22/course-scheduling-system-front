@@ -16,16 +16,12 @@
             @click="delAllSelection"
         >批量删除
         </el-button>
-        <el-select v-model="query.at" placeholder="部门" class="handle-select mr10">
-          <el-option key="1" label="电信工程系" value="电信工程系"></el-option>
-          <el-option key="2" label="电信17405" value="电信17405"></el-option>
-        </el-select>
         <el-input v-model="query.name" placeholder="用户名" class="handle-input mr10"></el-input>
         <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
         <el-button type="text" con="el-icon-add" @click="handleAdd">新增</el-button>
       </div>
       <el-table
-          :data="tableData"
+          :data="userList"
           border
           class="table"
           ref="multipleTable"
@@ -35,36 +31,49 @@
         <el-table-column type="selection" width="55" align="center"></el-table-column>
         <el-table-column prop="id" label="ID" width="55" align="center"></el-table-column>
         <el-table-column prop="name" label="用户名"></el-table-column>
-        <el-table-column label="所属部门">
-          <template #default="scope"> {{ scope.row.at }}</template>
-        </el-table-column>
-        <el-table-column label="头像" align="center">
+        <el-table-column prop="role" label="身份">
           <template #default="scope">
-            <el-image
-                class="table-td-thumb"
-                :src="scope.row.thumb"
-                :preview-src-list="[scope.row.thumb]"
-            ></el-image>
+            {{ roleTable(scope.row.role) }}
           </template>
         </el-table-column>
-        <el-table-column label="帐号状态" align="center">
+        <el-table-column label="帐号状态" width="80"  align="center">
           <template #default="scope">
             <el-tag
                 :type="
-                                scope.row.state === '正常'
+                                scope.row.status === 0
                                     ? 'success'
-                                    : scope.row.state === '禁用'
+                                    : scope.row.status === 1
                                     ? 'danger'
                                     : ''
                             "
-            >{{ scope.row.state }}
+            >{{ scope.row.status===1?"禁用":"正常" }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="loginTime" label="上次登录时间"></el-table-column>
-        <el-table-column prop="createTime" label="创建时间"></el-table-column>
-        <el-table-column label="操作" width="270" align="center">
+        <el-table-column prop="last_login_time" label="上次登录时间">
           <template #default="scope">
+            {{ new Date(scope.row.last_login_time).toLocaleString() }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="last_login_loc" label="上次登录地点"></el-table-column>
+        <el-table-column prop="created_at" label="创建时间">
+          <template #default="scope">
+            {{ new Date(scope.row.created_at).toLocaleString() }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="updated_at" label="修改时间">
+          <template #default="scope">
+            {{ new Date(scope.row.updated_at).toLocaleString() }}
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="350" align="center">
+          <template #default="scope">
+            <el-button
+                type="text"
+                icon="el-icon-lx-warnfill"
+                @click="handleEdit(scope.$index, scope.row)"
+            >启用/禁用
+            </el-button>
             <el-button
                 type="text"
                 icon="el-icon-help"
@@ -159,19 +168,17 @@
 </template>
 
 <script>
-import {fetchData} from "../api/index";
+import {listUsers} from "../api/user";
 
 export default {
-  name: "basetable",
   data() {
     return {
       query: {
-        address: "",
-        name: "",
+        search: "",
         pageIndex: 1,
         pageSize: 10
       },
-      tableData: [],
+      userList: [],
       multipleSelection: [],
       delList: [],
       addVisible: false,
@@ -186,45 +193,55 @@ export default {
     this.getData();
   },
   methods: {
-    // 获取 easy-mock 的模拟数据
     getData() {
-      fetchData(this.query).then(res => {
+      listUsers(this.query).then(res => {
         console.log(res);
-        this.tableData = res.list;
-        this.pageTotal = res.pageTotal || 50;
+        this.userList = res.list;
+        this.pageTotal = res.pageTotal;
       });
     },
     // 触发搜索按钮
     handleSearch() {
-      this.$set(this.query, "pageIndex", 1);
+      this.query.pageIndex = 1;
       this.getData();
     },
     // 删除操作
-    handleDelete(index) {
+    handleDelete(index, row) {
+      console.log(index, row);
       // 二次确认删除
       this.$confirm("确定要删除吗？", "提示", {
         type: "warning"
-      })
-          .then(() => {
-            this.$message.success("删除成功");
-            this.tableData.splice(index, 1);
-          })
-          .catch(() => {
-          });
+      }).then(() => {
+/*        deleteCourse(row.id).then(() => {
+              this.$message.success("删除成功");
+              this.tableData.splice(index, 1);
+            }
+        )*/
+      });
     },
     // 多选操作
     handleSelectionChange(val) {
       this.multipleSelection = val;
     },
     delAllSelection() {
-      const length = this.multipleSelection.length;
-      let str = "";
-      this.delList = this.delList.concat(this.multipleSelection);
-      for (let i = 0; i < length; i++) {
-        str += this.multipleSelection[i].name + " ";
-      }
-      this.$message.error(`删除了${str}`);
-      this.multipleSelection = [];
+      // 二次确认删除
+      this.$confirm("确定要批量删除吗？", "提示", {
+        type: "warning"
+      }).then(() => {
+        let proc = [];
+        for (let i = 0; i < this.multipleSelection.length; i++) {
+          //proc.push(deleteCourse(this.multipleSelection[i].id));
+        }
+        Promise.all(proc).then(()=>{
+          this.$message.success(`删除成功`);
+          this.multipleSelection = [];
+          this.getData();
+        }).catch(()=>{
+          this.$message.error(`删除出错`);
+          this.multipleSelection = [];
+          this.getData();
+        });
+      });
     },
     handleAdd() {
       this.addVisible = true;
@@ -239,12 +256,19 @@ export default {
     saveEdit() {
       this.editVisible = false;
       this.$message.success(`修改第 ${this.idx + 1} 行成功`);
-      this.$set(this.tableData, this.idx, this.form);
+      this.tableData[this.idx] = this.form;
     },
     // 分页导航
     handlePageChange(val) {
-      this.$set(this.query, "pageIndex", val);
+      this.query.pageIndex=val;
       this.getData();
+    },
+    roleTable(role) {
+      return {
+        "admin": "超级管理",
+        "operator": "教务管理",
+        "teacher" : "教师",
+      }[role];
     }
   }
 };
