@@ -1,4 +1,4 @@
-# vue-manage-system
+# course-scheduling-system-front
 
 The system is based on
 https://github.com/lin-xin/vue-manage-system
