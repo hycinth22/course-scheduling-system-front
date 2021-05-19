@@ -10,7 +10,7 @@
     <div class="container">
       <div class="handle-box">
         <el-button type="primary" icon="el-icon-lx-add" @click="handleAdd" class="mr10">新增</el-button>
-        <el-checkbox v-model="hidePast" @click="getData">隐藏已结束的学期</el-checkbox>
+        <el-checkbox v-model="hidePast" @change="handleToggleHidePast">隐藏已结束的学期</el-checkbox>
       </div>
       <el-table
           :data="filtered_data"
@@ -21,7 +21,7 @@
           @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="55" align="center"></el-table-column>
-<!--        <el-table-column type="index" label="序号" width="75" align="center"></el-table-column>-->
+        <!--        <el-table-column type="index" label="序号" width="75" align="center"></el-table-column>-->
         <el-table-column prop="semester_name" label="名称"></el-table-column>
         <el-table-column prop="start_date" label="起始日期"></el-table-column>
         <el-table-column prop="semester_weeks" label="周数"></el-table-column>
@@ -82,7 +82,7 @@
 </template>
 
 <script>
-import {listSemesters} from "../api/semester";
+import {getHiddenPastSemester, listSemesters, saveHiddenPastSemester} from "../api/semester";
 
 export default {
   data() {
@@ -113,21 +113,28 @@ export default {
   },
   created() {
     this.getData();
+    getHiddenPastSemester().then((resp)=>{
+      this.hidePast = resp.val;
+    });
   },
   computed: {
     filtered_data() {
-      if(!this.hidePast) return this.data;
+      if (!this.hidePast) return this.data;
       const now = Date.now();
       return this.data.filter(function (currentValue) {
         let date = new Date(currentValue.start_date);
-        date.setTime(date.getTime()+currentValue.semester_weeks*7*86400*1000);
+        date.setTime(date.getTime() + currentValue.semester_weeks * 7 * 86400 * 1000);
         return date > now;
       })
     },
   },
   methods: {
+    handleToggleHidePast(newVal) {
+      saveHiddenPastSemester(newVal);
+      this.getData();
+    },
     getData() {
-      listSemesters(this.query).then(resp => {
+      listSemesters(true).then(resp => {
         console.log(resp);
         this.data = resp;
       });
