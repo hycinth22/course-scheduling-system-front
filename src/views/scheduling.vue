@@ -128,7 +128,6 @@
             <el-link href="#" @click="printTeacher" :underline="true" icon="el-icon-lx-file" class="mr10">
               打印院系课表
             </el-link>
-
           </el-tab-pane>
           <el-tab-pane label="教师课表" name="third">
             <div class="handle-box">
@@ -178,7 +177,28 @@
             <el-link href="#" @click="printTeacherPersonal" :underline="true" icon="el-icon-lx-file" class="mr10">
               打印教师个人课表
             </el-link>
-
+          </el-tab-pane>
+          <el-tab-pane label="总课表" name="entire">
+            <el-table
+                :data="entireData" border class="table" ref="multipleTable"
+                header-cell-class-name="table-header"
+            >
+              <el-table-column type="index" label="时间段" width="95" align="center"></el-table-column>
+              <el-table-column prop="1" label="周一" min-width="180" align="center"
+                               :formatter="formatterItemForTeacher"></el-table-column>
+              <el-table-column prop="2" label="周二" min-width="180" align="center"
+                               :formatter="formatterItemForTeacher"></el-table-column>
+              <el-table-column prop="3" label="周三" min-width="180" align="center"
+                               :formatter="formatterItemForTeacher"></el-table-column>
+              <el-table-column prop="4" label="周四" min-width="180" align="center"
+                               :formatter="formatterItemForTeacher"></el-table-column>
+              <el-table-column prop="5" label="周五" min-width="180" align="center"
+                               :formatter="formatterItemForTeacher"></el-table-column>
+              <el-table-column prop="6" label="周六" min-width="95" align="center"
+                               :formatter="formatterItemForTeacher"></el-table-column>
+              <el-table-column prop="7" label="周日" min-width="95" align="center"
+                               :formatter="formatterItemForTeacher"></el-table-column>
+            </el-table>
           </el-tab-pane>
         </el-tabs>
       </div>
@@ -342,6 +362,7 @@ export default {
       teacherPersonalData: [
         // [teacher_id][timespan][week]
       ],
+      entireData: [],
       k: 0,
     };
   },
@@ -423,6 +444,7 @@ export default {
         this.clazzData = resp.items.by_clazz;
         this.deptData = resp.items.by_dept;
         this.teacherPersonalData = resp.items.by_teacher_personal;
+        this.entireData = resp.items.entire;
       })
     },
     loadColleges() {
