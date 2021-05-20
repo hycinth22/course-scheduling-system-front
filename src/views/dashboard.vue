@@ -77,11 +77,11 @@
           <template #header>
             <div class="clearfix">
               <span>待办事项</span>
-              <el-button style="float: right; padding: 3px 0" type="text">添加</el-button>
+              <el-button style="float: right; padding: 3px 0" type="text" @click="handleAddTodo">添加</el-button>
             </div>
           </template>
 
-          <el-table :show-header="false" :data="todoList" style="width:100%;">
+          <el-table :show-header="false" :data="todoList" style="width:100%;" @row-dblclick="handleDelTodo">
             <el-table-column width="40">
               <template #default="scope">
                 <el-checkbox v-model="scope.row.status"></el-checkbox>
@@ -109,12 +109,14 @@
       </el-col>
     </el-row>
     <el-row :gutter="20">
-      <img class="bg" src="../assets/img/w.png" alt="decoration" />
+      <img class="bg" src="../assets/img/w.png" alt="decoration"/>
     </el-row>
   </div>
 </template>
 
 <script>
+import {getTodos, setTodos} from "../todolist";
+
 export default {
   name: "dashboard",
   data() {
@@ -144,28 +146,30 @@ export default {
           avgLessons: 11,
         },
       },
-      todoList: [
+      todoList: [],
+      default_todoList: [
         {
-          title: "录入课程信息",
+          id: this.guid(),
+          title: "录入课程信息、录入教室信息",
           status: true
         },
         {
-          title: "录入教室信息",
+          id: this.guid(),
+          title: "录入师生信息、录入开课选课信息",
           status: true
         },
         {
-          title: "录入师生信息",
-          status: true
-        },
-        {
+          id: this.guid(),
           title: "录入开课选课信息",
-          status: false
+          status: true
         },
         {
+          id: this.guid(),
           title: "制定备选方案",
           status: false
         },
         {
+          id: this.guid(),
           title: "选择方案与公布",
           status: false
         }
@@ -175,6 +179,18 @@ export default {
   },
   created() {
     this.user = JSON.parse(localStorage.getItem("ms_userprofile"));
+    this.todoList = getTodos();
+    if (this.todoList.length === 0) {
+      this.todoList = this.default_todoList;
+    }
+  },
+  watch: {
+    todoList: {
+      handler(newValue) {
+        setTodos(newValue);
+      },
+      deep: true,
+    }
   },
   computed: {
     role_str() {
@@ -186,15 +202,30 @@ export default {
       return table[this.user.role] ? table[this.user.role] : "普通用户";
     }
   },
-
   methods: {
-    changeDate() {
-      const now = new Date().getTime();
-      this.data.forEach((item, index) => {
-        const date = new Date(now - (6 - index) * 86400000);
-        item.name = `${date.getFullYear()}/${date.getMonth() +
-        1}/${date.getDate()}`;
-      });
+    guid() {
+      function S4() {
+        return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+      }
+
+      return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
+    },
+    handleAddTodo() {
+      let content = prompt("输入要添加的待办事项");
+      if (content === "undefined") return;
+      const obj = {
+        id: this.guid(),
+        title: content,
+        status: false
+      };
+      this.todoList.push(obj);
+    },
+    handleDelTodo(row) {
+      const idx = this.todoList.findIndex((elem)=>elem.id===row.id);
+      console.log(idx);
+      if(idx!==-1){
+        this.todoList.splice(idx, 1);
+      }
     }
   }
 };
