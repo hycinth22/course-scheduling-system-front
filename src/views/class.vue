@@ -16,7 +16,7 @@
 <!--        </el-select>-->
         <el-input v-model="query.name" placeholder="编号/班级名" class="handle-input mr10"></el-input>
         <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
-        <el-button type="danger" icon="el-icon-delete" class="handle-del mr10" @click="delAllSelection">批量删除</el-button>
+        <el-button type="danger" icon="el-icon-delete" class="handle-del mr10" @click="delAllSelection">删除选中条目</el-button>
       </div>
       <el-table
           :data="tableData"

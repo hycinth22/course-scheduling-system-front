@@ -116,6 +116,7 @@
 
 <script>
 import {getTodos, setTodos} from "../todolist";
+import {getRoleStr} from "../roles";
 
 export default {
   name: "dashboard",
@@ -194,12 +195,7 @@ export default {
   },
   computed: {
     role_str() {
-      const table = {
-        "admin": "系统管理员",
-        "operator": "教务管理",
-        "teacher": "教师",
-      };
-      return table[this.user.role] ? table[this.user.role] : "普通用户";
+      return getRoleStr(this.user.role);
     }
   },
   methods: {

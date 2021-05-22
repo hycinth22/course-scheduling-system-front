@@ -16,7 +16,7 @@
             @click="delAllSelection"
         >批量删除
         </el-button>
-        <el-input v-model="query.name" placeholder="用户名" class="handle-input mr10"></el-input>
+        <el-input v-model="query.search" placeholder="用户名" class="handle-input mr10"></el-input>
         <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
         <el-button type="text" con="el-icon-add" @click="handleAdd">新增</el-button>
       </div>
@@ -33,10 +33,10 @@
         <el-table-column prop="name" label="用户名"></el-table-column>
         <el-table-column prop="role" label="身份">
           <template #default="scope">
-            {{ roleTable(scope.row.role) }}
+            {{ roleTable(scope.row.role) }} {{ associatedInfo(scope.row) }}
           </template>
         </el-table-column>
-        <el-table-column label="帐号状态" width="80"  align="center">
+        <el-table-column label="帐号状态" width="80" align="center">
           <template #default="scope">
             <el-tag
                 :type="
@@ -46,7 +46,7 @@
                                     ? 'danger'
                                     : ''
                             "
-            >{{ scope.row.status===1?"禁用":"正常" }}
+            >{{ scope.row.status === 1 ? "禁用" : "正常" }}
             </el-tag>
           </template>
         </el-table-column>
@@ -71,7 +71,7 @@
             <el-button
                 type="text"
                 icon="el-icon-lx-warnfill"
-                @click="handleEdit(scope.$index, scope.row)"
+                @click="handleToggleStatus(scope.$index, scope.row)"
             >启用/禁用
             </el-button>
             <el-button
@@ -168,7 +168,8 @@
 </template>
 
 <script>
-import {listUsers} from "../api/user";
+import {listUsers, resetUserPassword, setUserStatus, deleteUser} from "../api/user";
+import {getRoleStr} from "../roles";
 
 export default {
   data() {
@@ -212,11 +213,11 @@ export default {
       this.$confirm("确定要删除吗？", "提示", {
         type: "warning"
       }).then(() => {
-/*        deleteCourse(row.id).then(() => {
+        deleteUser(row.id).then(() => {
               this.$message.success("删除成功");
-              this.tableData.splice(index, 1);
+              this.getData();
             }
-        )*/
+        )
       });
     },
     // 多选操作
@@ -230,13 +231,13 @@ export default {
       }).then(() => {
         let proc = [];
         for (let i = 0; i < this.multipleSelection.length; i++) {
-          //proc.push(deleteCourse(this.multipleSelection[i].id));
+          proc.push(deleteUser(this.multipleSelection[i].id));
         }
-        Promise.all(proc).then(()=>{
+        Promise.all(proc).then(() => {
           this.$message.success(`删除成功`);
           this.multipleSelection = [];
           this.getData();
-        }).catch(()=>{
+        }).catch(() => {
           this.$message.error(`删除出错`);
           this.multipleSelection = [];
           this.getData();
@@ -260,15 +261,29 @@ export default {
     },
     // 分页导航
     handlePageChange(val) {
-      this.query.pageIndex=val;
+      this.query.pageIndex = val;
       this.getData();
     },
     roleTable(role) {
-      return {
-        "admin": "超级管理",
-        "operator": "教务管理",
-        "teacher" : "教师",
-      }[role];
+      return getRoleStr(role);
+    },
+    handleToggleStatus(index, row) {
+      setUserStatus(row.id, row.status === 0 ? 1 : 0).then(() => {
+        this.getData();
+        this.$message.success(`启用/禁用成功`);
+      });
+    },
+    handleResetPWD(index, row) {
+      const newPwd = prompt("输入新密码");
+      resetUserPassword(row.id, newPwd).then(() => {
+        this.getData();
+        this.$message.success(`重置密码成功`);
+      });
+    },
+    associatedInfo(row) {
+      if (!row.associated_teacher) return "";
+      if (row.associated_teacher.teacher_id.length === 0) return "";
+      return "(" + row.associated_teacher.teacher_id.toString() + ")";
     }
   }
 };

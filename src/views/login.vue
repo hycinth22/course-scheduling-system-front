@@ -93,7 +93,13 @@ export default {
                       elem.innerHTML = countdown.toString();
                     }, 1000);
                   }
-                  this.$message.error("错误的用户名或密码");
+                  if (resp.code === -10001) {
+                    this.$message.error("错误的用户名或密码");
+                  } else if (resp.code === -10002) {
+                    this.$message.error("帐号被禁用");
+                  } else {
+                    this.$message.error("未知登录错误");
+                  }
                   this.param.password = '';
                 }
               })

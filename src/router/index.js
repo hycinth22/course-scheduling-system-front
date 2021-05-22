@@ -173,16 +173,6 @@ const routes = [
                     "../views/class.vue")
             },
             {
-                path: "/student",
-                name: "student",
-                meta: {
-                    title: '学生管理'
-                },
-                component: () => import (
-                    /* webpackChunkName: "student" */
-                    "../views/student.vue")
-            },
-            {
                 path: "/course.json",
                 name: "course.json",
                 meta: {

@@ -22,7 +22,7 @@
             icon="el-icon-delete"
             class="handle-del mr10"
             @click="delAllSelection"
-        >批量删除
+        >删除选中条目
         </el-button>
       </div>
       <el-table
