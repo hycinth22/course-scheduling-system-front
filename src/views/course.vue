@@ -12,7 +12,8 @@
         <el-button type="primary" icon="el-icon-lx-add" @click="handleAdd" class="mr10">新增</el-button>
         <el-input v-model="query.search" placeholder="课程编号/课程名/开设单位" class="handle-input mr10"></el-input>
         <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
-        <el-button type="danger" icon="el-icon-delete" class="handle-del mr10" @click="delAllSelection">删除选中条目</el-button>
+        <el-button type="danger" icon="el-icon-delete" class="handle-del mr10" @click="delAllSelection">删除选中条目
+        </el-button>
         <el-button type="primary" icon="el-icon-lx-forward" @click="importVisible=true" class="mr10">导入Excel</el-button>
       </div>
       <el-table
@@ -77,13 +78,19 @@
           <el-input v-model.number="form.lessons"></el-input>
         </el-form-item>
         <el-form-item label="每周学时">
-          <el-input v-model.number="form.lessons_per_week"></el-input>
+          <el-input v-model.number="form.lessons_per_week"  size="medium"></el-input>
         </el-form-item>
         <el-form-item label="课程属性">
-          <el-input v-model="form.kind"></el-input>
+          <el-select v-model="form.kind" placeholder="请选择课程属性" size="medium">
+            <el-option key="1" label="选修" value="选修"></el-option>
+            <el-option key="2" label="必修" value="必修"></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="考核方式">
-          <el-input v-model="form.exam_mode"></el-input>
+          <el-select v-model="form.exam_mode" placeholder="请选择考查方式" size="medium">
+            <el-option key="1" label="考试" value="考试"></el-option>
+            <el-option key="2" label="考查" value="考查"></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="开课单位">
           <el-input v-model="form.founder"></el-input>
@@ -112,10 +119,16 @@
           <el-input v-model.number="form.lessons_per_week"></el-input>
         </el-form-item>
         <el-form-item label="课程属性">
-          <el-input v-model="form.kind"></el-input>
+          <el-select v-model="form.kind" placeholder="请选择课程属性" size="medium">
+            <el-option key="1" label="选修" value="选修"></el-option>
+            <el-option key="2" label="必修" value="必修"></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="考核方式">
-          <el-input v-model="form.exam_mode"></el-input>
+          <el-select v-model="form.exam_mode" placeholder="请选择考查方式" size="medium">
+            <el-option key="1" label="考试" value="考试"></el-option>
+            <el-option key="2" label="考查" value="考查"></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="开课单位">
           <el-input v-model="form.founder"></el-input>
@@ -152,6 +165,7 @@
 
 <script>
 import {listCourses, addCourse, deleteCourse, updateCourse, uploadCourseExcelURL} from "@/api/course";
+
 export default {
   data() {
     return {
@@ -179,7 +193,7 @@ export default {
       addVisible: false,
       editVisible: false,
       importVisible: false,
-      form:   {
+      form: {
         "exam_mode": "string",
         "founder": "string",
         "id": "string",
@@ -238,11 +252,11 @@ export default {
         for (let i = 0; i < this.multipleSelection.length; i++) {
           proc.push(deleteCourse(this.multipleSelection[i].id));
         }
-        Promise.all(proc).then(()=>{
+        Promise.all(proc).then(() => {
           this.$message.success(`删除成功`);
           this.multipleSelection = [];
           this.getData();
-        }).catch(()=>{
+        }).catch(() => {
           this.$message.error(`删除出错`);
           this.multipleSelection = [];
           this.getData();
@@ -269,7 +283,7 @@ export default {
     // 保存编辑
     saveEdit() {
       this.editVisible = false;
-      updateCourse(this.form).then(()=>{
+      updateCourse(this.form).then(() => {
         this.getData();
         this.$message.success(`修改第 ${this.id_edit + 1} 行成功`);
         this.tableData.idx = this.form;
@@ -277,7 +291,7 @@ export default {
     },
     // 分页导航
     handlePageChange(val) {
-      this.query.pageIndex=val;
+      this.query.pageIndex = val;
       this.getData();
     }
   }
