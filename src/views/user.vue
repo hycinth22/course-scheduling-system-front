@@ -16,7 +16,7 @@
             @click="delAllSelection"
         >批量删除
         </el-button>
-        <el-input v-model="query.search" placeholder="用户名" class="handle-input mr10"></el-input>
+        <el-input v-model="query.search" placeholder="搜索用户名/职工号" class="handle-input mr10"></el-input>
         <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
         <el-button type="text" con="el-icon-add" @click="handleAdd">新增</el-button>
       </div>
@@ -112,11 +112,27 @@
     <!-- 编辑弹出框 -->
     <el-dialog title="编辑" v-model="editVisible" width="30%">
       <el-form ref="form" :model="form" label-width="70px">
-        <el-form-item label="用户名">
-          <el-input v-model="form.name"></el-input>
+        <el-form-item label="帐号ID">
+          <el-input v-model="form.id" disabled></el-input>
         </el-form-item>
-        <el-form-item label="地址">
-          <el-input v-model="form.address"></el-input>
+        <el-form-item label="用户名">
+          <el-input v-model="form.name"  placeholder="请输入用户名"></el-input>
+        </el-form-item>
+        <el-form-item label="用户身份">
+          <el-select v-model="form.role" placeholder="请选择用户身份" size="medium">
+            <el-option
+                v-for="(val,key) in roles"
+                :key="key" :label="val" :value="key"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="帐号状态">
+          <el-select v-model.number="form.status" placeholder="请选择帐号状态" size="medium">
+            <el-option key="0" label="正常" :value="0"></el-option>
+            <el-option key="1" label="禁用" :value="1"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="关联教师">
+          <el-input v-model="form.associated_teacher.teacher_id" placeholder="请输入关联教师的工号"></el-input>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -126,40 +142,34 @@
                 </span>
       </template>
     </el-dialog>
-    <el-dialog title="新增教师帐号" v-model="addVisible" width="30%">
-      <el-form ref="form" :model="form" label-width="70px">
-        <el-form-item label="用户名">
-          <el-input v-model="form.name"></el-input>
-        </el-form-item>
-        <el-form-item label="密码">
-          <el-input v-model="form.pwd" show-password></el-input>
-        </el-form-item>
-        <el-form-item label="所属部门">
-          <el-input v-model="form.pwd"></el-input>
-        </el-form-item>
-      </el-form>
-      <template #footer>
-                <span class="dialog-footer">
-                    <el-button @click="addVisible = false">取 消</el-button>
-                    <el-button type="primary" @click="saveEdit">确 定</el-button>
-                </span>
-      </template>
-    </el-dialog>
     <el-dialog title="新增帐号" v-model="addVisible" width="30%">
       <el-form ref="form" :model="form" label-width="70px">
         <el-form-item label="用户名">
-          <el-input v-model="form.name"></el-input>
+          <el-input v-model="form.name" placeholder="请输入用户名"></el-input>
         </el-form-item>
-        <el-form-item label="密码">
-          <el-input v-model="form.pwd" show-password value="123456"></el-input>
+        <el-form-item label="帐号密码" >
+          <el-input v-model="form.password" placeholder="请输入密码" show-password></el-input>
         </el-form-item>
-        <el-form-item label="所属班级">
-          <el-input v-model="form.class"></el-input>
+        <el-form-item label="帐号身份">
+          <el-select v-model="form.role" placeholder="请选择用户身份" size="medium">
+            <el-option
+                v-for="(val,key) in roles"
+                :key="key" :label="val" :value="key"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="帐号状态">
+          <el-select v-model.number="form.status" placeholder="请选择帐号状态" size="medium">
+            <el-option key="0" label="正常" :value="0"></el-option>
+            <el-option key="1" label="禁用" :value="1"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="关联教师">
+          <el-input v-model="form.associated_teacher.teacher_id" placeholder="请输入关联教师的工号"></el-input>
         </el-form-item>
       </el-form>
       <template #footer>
                 <span class="dialog-footer">
-                    <el-button @click="addVisible = false">取 消</el-button>
+                    <el-button @click="editVisible = false">取 消</el-button>
                     <el-button type="primary" @click="saveEdit">确 定</el-button>
                 </span>
       </template>
@@ -170,6 +180,7 @@
 <script>
 import {listUsers, resetUserPassword, setUserStatus, deleteUser} from "../api/user";
 import {getRoleStr} from "../roles";
+import roles from "../roles";
 
 export default {
   data() {
@@ -185,10 +196,31 @@ export default {
       addVisible: false,
       editVisible: false,
       pageTotal: 0,
-      form: {},
+      form:  {
+        "id": null,
+        "name": null,
+        "role": null,
+        "status": null,
+        "last_login_time": null,
+        "last_login_loc": null,
+        "associated_teacher": {
+          "teacher_id": null,
+          "teacher_name": null,
+          "teacher_title": null,
+          "teacher_tel": null,
+          "dept": null
+        },
+        "created_at": null,
+        "updated_at": null
+      },
       idx: -1,
       id: -1
     };
+  },
+  computed: {
+    roles() {
+      return roles;
+    }
   },
   created() {
     this.getData();
@@ -246,6 +278,23 @@ export default {
     },
     handleAdd() {
       this.addVisible = true;
+      this.form = {
+        "id": 0,
+        "name": "",
+        "role": "",
+        "status": 0,
+        "last_login_time": null,
+        "last_login_loc": null,
+        "associated_teacher": {
+          "teacher_id": null,
+          "teacher_name": null,
+          "teacher_title": null,
+          "teacher_tel": null,
+          "dept": null
+        },
+        "created_at": null,
+        "updated_at": null
+      };
     },
     // 编辑操作
     handleEdit(index, row) {
@@ -294,10 +343,6 @@ export default {
   margin-bottom: 20px;
 }
 
-.handle-select {
-  width: 120px;
-}
-
 .handle-input {
   width: 300px;
   display: inline-block;
@@ -320,10 +365,5 @@ export default {
   margin-right: 10px;
 }
 
-.table-td-thumb {
-  display: block;
-  margin: auto;
-  width: 40px;
-  height: 40px;
-}
+
 </style>
