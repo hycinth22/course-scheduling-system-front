@@ -169,8 +169,8 @@
       </el-form>
       <template #footer>
                 <span class="dialog-footer">
-                    <el-button @click="editVisible = false">取 消</el-button>
-                    <el-button type="primary" @click="saveEdit">确 定</el-button>
+                    <el-button @click="addVisible = false">取 消</el-button>
+                    <el-button type="primary" @click="saveAdd">确 定</el-button>
                 </span>
       </template>
     </el-dialog>
@@ -178,7 +178,7 @@
 </template>
 
 <script>
-import {listUsers, resetUserPassword, setUserStatus, deleteUser} from "../api/user";
+import {listUsers, resetUserPassword, setUserStatus, addUser, updateUser, deleteUser} from "../api/user";
 import {getRoleStr} from "../roles";
 import roles from "../roles";
 
@@ -227,7 +227,7 @@ export default {
   },
   methods: {
     getData() {
-      listUsers(this.query).then(res => {
+      return listUsers(this.query).then(res => {
         console.log(res);
         this.userList = res.list;
         this.pageTotal = res.pageTotal;
@@ -299,14 +299,29 @@ export default {
     // 编辑操作
     handleEdit(index, row) {
       this.idx = index;
+      if(!row.associated_teacher) {
+        row.associated_teacher = {
+          "teacher_id": null,
+          "teacher_name": null,
+          "teacher_title": null,
+          "teacher_tel": null,
+          "dept": null
+        };
+      }
       this.form = row;
       this.editVisible = true;
     },
-    // 保存编辑
+    saveAdd() {
+      addUser(this.form).then(this.getData).then(()=>{
+        this.addVisible = false;
+        this.$message.success(`新增成功`);
+      })
+    },
     saveEdit() {
-      this.editVisible = false;
-      this.$message.success(`修改第 ${this.idx + 1} 行成功`);
-      this.tableData[this.idx] = this.form;
+      updateUser(this.form).then(()=>{
+        this.editVisible = false;
+        this.$message.success(`新增成功`);
+      })
     },
     // 分页导航
     handlePageChange(val) {
@@ -323,14 +338,15 @@ export default {
       });
     },
     handleResetPWD(index, row) {
-      const newPwd = prompt("输入新密码");
+      const newPwd = prompt("输入新密码", "");
+      if (newPwd==="") return;
       resetUserPassword(row.id, newPwd).then(() => {
         this.getData();
         this.$message.success(`重置密码成功`);
       });
     },
     associatedInfo(row) {
-      if (!row.associated_teacher) return "";
+      if (!row.associated_teacher || !row.associated_teacher.teacher_id) return "";
       if (row.associated_teacher.teacher_id.length === 0) return "";
       return "(" + row.associated_teacher.teacher_id.toString() + ")";
     }

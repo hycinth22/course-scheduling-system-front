@@ -40,7 +40,7 @@ export const resetUserPassword = (id, password) => {
 
 export const addUser = obj => {
     return request({
-        url: base + '/',
+        url: base + '/new',
         method: 'post',
         data: obj
     });
