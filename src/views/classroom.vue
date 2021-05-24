@@ -59,10 +59,10 @@
     <el-dialog title="新增" v-model="addVisible" width="30%">
       <el-form ref="form" :model="form" label-width="70px">
         <el-form-item label="教学楼">
-          <el-input v-model="form.building"></el-input>
+          <el-input v-model="form.building" placeholder="请输入教学楼名称，如第一教学楼"></el-input>
         </el-form-item>
         <el-form-item label="教室号">
-          <el-input v-model="form.room"></el-input>
+          <el-input v-model="form.room" placeholder="请输入教室号，如101"></el-input>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -79,10 +79,10 @@
           <el-input v-model="form.id" disabled></el-input>
         </el-form-item>
         <el-form-item label="教学楼">
-          <el-input v-model="form.building"></el-input>
+          <el-input v-model="form.building" placeholder="请输入教学楼名称，如第一教学楼"></el-input>
         </el-form-item>
         <el-form-item label="教室号">
-          <el-input v-model="form.room"></el-input>
+          <el-input v-model="form.room"  placeholder="请输入教室号，如101"></el-input>
         </el-form-item>
       </el-form>
       <template #footer>

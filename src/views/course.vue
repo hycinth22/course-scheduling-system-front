@@ -65,16 +65,16 @@
     <el-dialog title="新增" v-model="addVisible" width="30%">
       <el-form ref="form" :model="form" label-width="70px">
         <el-form-item label="课程编号">
-          <el-input v-model="form.id"></el-input>
+          <el-input v-model="form.id" placeholder="请输入课程编号，如17060001"></el-input>
         </el-form-item>
         <el-form-item label="课程名">
-          <el-input v-model="form.name"></el-input>
+          <el-input v-model="form.name" placeholder="请输入课程名称，如 大学外语Ⅰ"></el-input>
         </el-form-item>
         <el-form-item label="总学时">
-          <el-input v-model.number="form.lessons"></el-input>
+          <el-input v-model.number="form.lessons" placeholder="请输入总学时，如36"></el-input>
         </el-form-item>
         <el-form-item label="每周学时">
-          <el-input v-model.number="form.lessons_per_week" size="medium"></el-input>
+          <el-input v-model.number="form.lessons_per_week" size="medium" placeholder="请输入每周学时，如2"></el-input>
         </el-form-item>
         <el-form-item label="课程属性">
           <el-select v-model="form.kind" placeholder="请选择课程属性" size="medium">
@@ -89,7 +89,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="开课单位">
-          <el-input v-model="form.founder"></el-input>
+          <el-input v-model="form.founder" placeholder="请输入开课单位"></el-input>
         </el-form-item>
       </el-form>
       <template #footer>
