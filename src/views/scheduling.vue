@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-loading="loading">
     <div class="crumbs">
       <el-breadcrumb separator="/">
         <el-breadcrumb-item>
@@ -205,9 +205,13 @@
       <el-divider></el-divider>
       <div>
         当前方案操作：
-        <el-button type="danger" icon="el-icon-lx-delete" @click="handleDeleteSchedule(query.scheduleID)" class="mr10">
-          删除方案
-        </el-button>
+        <el-popconfirm title="确定删除吗？" @confirm="handleDeleteSchedule(query.scheduleID)">
+          <template #reference>
+            <el-button type="danger" icon="el-icon-lx-delete" class="mr10">
+              删除方案
+            </el-button>
+          </template>
+        </el-popconfirm>
         <el-checkbox v-model="form.enabled">选中</el-checkbox>
         <el-button type="primary" icon="el-icon-lx-text" @click="savePlan" class="mr10">保存</el-button>
       </div>
@@ -233,6 +237,7 @@ import {listTeachersInCollege} from "../api/teacher";
 export default {
   data() {
     return {
+      loading: false,
       query: {
         semesterID: null,
         scheduleID: null,
@@ -367,8 +372,10 @@ export default {
     };
   },
   created() {
-    this.loadSemesters();
-    this.loadColleges();
+    this.loading=true;
+    Promise.all([this.loadSemesters(), this.loadColleges()]).then(()=>{
+      this.loading=false;
+    });
   },
   watch: {
     "query.semesterID": function () {
@@ -385,6 +392,7 @@ export default {
   },
   methods: {
     handleAddSchedule() {
+      this.loading=true;
       createNewSchedule(this.query.semesterID).then(resp => {
         this.schedules.push({
           "schedule_id": resp.schedule_id,
@@ -395,22 +403,20 @@ export default {
           }
         });
         this.query.scheduleID = resp.schedule_id;
+        this.loading=false;
         this.$message.success("新建方案成功，已选择新方案");
       });
     },
     handleDeleteSchedule(schedule_id) {
-      // 二次确认删除
-      this.$confirm("确定要删除吗？", "提示", {
-        type: "warning"
-      }).then(() => {
-        deleteSchedule(schedule_id).then(() => {
-              this.clazzData = [];
-              this.deptData = [];
-              this.$message.success("删除成功");
-              this.loadSchedulesList(this.query.semesterID);
-            }
-        )
-      });
+      this.loading=true;
+      deleteSchedule(schedule_id).then(() => {
+          this.loading=false;
+            this.clazzData = [];
+            this.deptData = [];
+            this.$message.success("删除成功");
+            this.loadSchedulesList(this.query.semesterID);
+          }
+      );
     },
     handleDeleteAllSchedule() {
       // 二次确认删除
@@ -427,19 +433,19 @@ export default {
       });
     },
     loadSemesters() {
-      listSemesters().then(resp => {
+      return listSemesters().then(resp => {
         this.semesters = resp;
       });
     },
     loadSchedulesList(semester) {
       this.query.scheduleID = null;
       this.schedules = [];
-      listSchedulesInSemester(semester).then(resp => {
+      return listSchedulesInSemester(semester).then(resp => {
         this.schedules = resp;
       });
     },
     loadSchedulesItems(scheduleID) {
-      listSchedulesItemsGroupView(scheduleID).then(resp => {
+      return listSchedulesItemsGroupView(scheduleID).then(resp => {
         this.planScore = resp.score;
         this.clazzData = resp.items.by_clazz;
         this.deptData = resp.items.by_dept;
@@ -448,28 +454,28 @@ export default {
       })
     },
     loadColleges() {
-      listColleges().then(resp => {
+      return listColleges().then(resp => {
         this.colleges = resp;
       });
     },
     loadClazzes(collegeID) {
       this.query.clazzID = null;
       this.clazzes = [];
-      listClazzesInCollege(collegeID).then(resp => {
+      return listClazzesInCollege(collegeID).then(resp => {
         this.clazzes = resp;
       });
     },
     loadDepartments(collegeID) {
       this.query.deptID = null;
       this.departments = [];
-      listDepartmentsInCollege(collegeID).then(resp => {
+      return listDepartmentsInCollege(collegeID).then(resp => {
         this.departments = resp;
       });
     },
     loadTeachers(collegeID) {
       this.query.teacherID = null;
       this.teachers = [];
-      listTeachersInCollege(collegeID).then(resp => {
+      return listTeachersInCollege(collegeID).then(resp => {
         this.teachers = resp;
       });
     },

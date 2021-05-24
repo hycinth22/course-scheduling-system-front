@@ -34,13 +34,11 @@
                 @click="handleEdit(scope.$index, scope.row)"
             >编辑
             </el-button>
-            <el-button
-                type="text"
-                icon="el-icon-delete"
-                class="red"
-                @click="handleDelete(scope.$index, scope.row)"
-            >删除
-            </el-button>
+            <el-popconfirm title="确定删除吗？" @confirm="handleDelete(scope.$index, scope.row)">
+              <template #reference>
+                <el-button type="text" icon="el-icon-delete" class="red">删除</el-button>
+              </template>
+            </el-popconfirm>
           </template>
         </el-table-column>
       </el-table>
@@ -158,14 +156,9 @@ export default {
       this.getData();
     },
     handleDelete(index, row) {
-      this.$confirm("确定要删除吗？", "提示", {
-        type: "warning"
-      }).then(() => {
-        deleteDepartment(row.dept_id).then(() => {
-              this.$message.success("删除成功");
-              this.tableData.splice(index, 1);
-            }
-        )
+      deleteDepartment(row.dept_id).then(() => {
+        this.$message.success("删除成功");
+        this.tableData.splice(index, 1);
       });
     },
     handleSelectionChange(val) {

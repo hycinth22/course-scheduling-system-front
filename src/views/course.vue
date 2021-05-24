@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-loading="loading">
     <div class="crumbs">
       <el-breadcrumb separator="/">
         <el-breadcrumb-item>
@@ -32,8 +32,6 @@
         <el-table-column prop="kind" label="课程属性"></el-table-column>
         <el-table-column prop="exam_mode" label="考核方式"></el-table-column>
         <el-table-column prop="founder" label="开课单位"></el-table-column>
-
-
         <el-table-column label="操作" width="180" align="center">
           <template #default="scope">
             <el-button
@@ -42,13 +40,11 @@
                 @click="handleEdit(scope.$index, scope.row)"
             >编辑
             </el-button>
-            <el-button
-                type="text"
-                icon="el-icon-delete"
-                class="red"
-                @click="handleDelete(scope.$index, scope.row)"
-            >删除
-            </el-button>
+            <el-popconfirm title="确定删除吗？" @confirm="handleDelete(scope.$index, scope.row)">
+              <template #reference>
+                <el-button type="text" icon="el-icon-delete" class="red">删除</el-button>
+              </template>
+            </el-popconfirm>
           </template>
         </el-table-column>
       </el-table>
@@ -78,7 +74,7 @@
           <el-input v-model.number="form.lessons"></el-input>
         </el-form-item>
         <el-form-item label="每周学时">
-          <el-input v-model.number="form.lessons_per_week"  size="medium"></el-input>
+          <el-input v-model.number="form.lessons_per_week" size="medium"></el-input>
         </el-form-item>
         <el-form-item label="课程属性">
           <el-select v-model="form.kind" placeholder="请选择课程属性" size="medium">
@@ -147,7 +143,7 @@
           drag
           :action="uploadExcelURL"
           name="courseExcel"
-          :on-success="getData"
+          @on-success="handleUploadSuccess"
           multiple
       >
         <i class="el-icon-upload"></i>
@@ -203,10 +199,14 @@ export default {
         "name": "string"
       },
       id_edit: -1,
+      loading: false,
     };
   },
   created() {
-    this.getData();
+    this.loading = true;
+    this.getData().then(() => {
+      this.loading = false;
+    });
   },
   computed: {
     uploadExcelURL() {
@@ -215,7 +215,7 @@ export default {
   },
   methods: {
     getData() {
-      listCourses(this.query).then(res => {
+      return listCourses(this.query).then(res => {
         console.log(res);
         this.tableData = res.list;
         this.pageTotal = res.pageTotal;
@@ -223,25 +223,27 @@ export default {
     },
     // 触发搜索按钮
     handleSearch() {
+      this.loading = true;
+      let search = this.query.search;
       this.query.pageIndex = 1;
-      this.getData();
+      this.getData().then(() => {
+        this.loading = false;
+        this.$message.success("搜索" + search + "完毕");
+      });
     },
     // 删除操作
     handleDelete(index, row) {
-      // 二次确认删除
-      this.$confirm("确定要删除吗？", "提示", {
-        type: "warning"
-      }).then(() => {
-        deleteCourse(row.id).then(() => {
-              this.$message.success("删除成功");
-              this.tableData.splice(index, 1);
-            }
-        )
+      deleteCourse(row.id).then(() => {
+        this.$message.success("删除成功");
+        this.tableData.splice(index, 1);
       });
     },
     // 多选操作
     handleSelectionChange(val) {
       this.multipleSelection = val;
+    },
+    handleUploadSuccess() {
+      this.$message.success("导入成功");
     },
     delAllSelection() {
       // 二次确认删除
@@ -269,9 +271,8 @@ export default {
     },
     saveAdd() {
       this.addVisible = false;
-      addCourse(this.form).then((resp) => {
+      addCourse(this.form).then(this.getData).then((resp) => {
         this.$message.success(`新增课程 ${resp.id} 成功`);
-        this.tableData.push(this.form);
       });
     },
     // 编辑操作
@@ -283,8 +284,7 @@ export default {
     // 保存编辑
     saveEdit() {
       this.editVisible = false;
-      updateCourse(this.form).then(() => {
-        this.getData();
+      updateCourse(this.form).then(this.getData).then(() => {
         this.$message.success(`修改第 ${this.id_edit + 1} 行成功`);
         this.tableData.idx = this.form;
       })
@@ -295,7 +295,8 @@ export default {
       this.getData();
     }
   }
-};
+}
+;
 </script>
 
 <style scoped>
