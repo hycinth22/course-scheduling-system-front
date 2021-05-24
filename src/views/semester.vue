@@ -48,11 +48,14 @@
     <!-- 编辑弹出框 -->
     <el-dialog title="编辑" v-model="editVisible" width="30%">
       <el-form ref="form" :model="form" label-width="70px">
-        <el-form-item label="编号">
-          <el-input v-model="form.id"></el-input>
+        <el-form-item label="学期名称">
+          <el-input v-model="form.semester_name" placeholder="请输入学期名称"></el-input>
         </el-form-item>
-        <el-form-item label="名称">
-          <el-input v-model="form.name"></el-input>
+        <el-form-item label="开始日期">
+          <el-input v-model="form.start_date" placeholder="请输入开始日期（不可重复）" disabled></el-input>
+        </el-form-item>
+        <el-form-item label="周数">
+          <el-input v-model.number="form.semester_weeks" placeholder="请输入学期周数"></el-input>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -64,17 +67,20 @@
     </el-dialog>
     <el-dialog title="新增" v-model="addVisible" width="30%">
       <el-form ref="form" :model="form" label-width="70px">
-        <el-form-item label="编号">
-          <el-input v-model="form.id"></el-input>
+        <el-form-item label="学期名称">
+          <el-input v-model="form.semester_name"  placeholder="请输入学期名称"></el-input>
         </el-form-item>
-        <el-form-item label="名称">
-          <el-input v-model="form.name"></el-input>
+        <el-form-item label="开始日期">
+          <el-input v-model="form.start_date" placeholder="请输入开始日期（不可重复）"></el-input>
+        </el-form-item>
+        <el-form-item label="周数">
+          <el-input v-model.number="form.semester_weeks" placeholder="请输入学期周数"></el-input>
         </el-form-item>
       </el-form>
       <template #footer>
                 <span class="dialog-footer">
                     <el-button @click="addVisible = false">取 消</el-button>
-                    <el-button type="primary" @click="saveEdit">确 定</el-button>
+                    <el-button type="primary" @click="saveAdd">确 定</el-button>
                 </span>
       </template>
     </el-dialog>
@@ -82,7 +88,7 @@
 </template>
 
 <script>
-import {getHiddenPastSemester, listSemesters, saveHiddenPastSemester} from "../api/semester";
+import {getHiddenPastSemester, listSemesters, saveHiddenPastSemester, addSemester, updateSemester, deleteSemester} from "../api/semester";
 
 export default {
   data() {
@@ -105,7 +111,11 @@ export default {
       addVisible: false,
       editVisible: false,
       pageTotal: 0,
-      form: {},
+      form:         {
+        "semester_name": "",
+        "semester_weeks": 0,
+        "start_date": ""
+      },
       idx: -1,
       id: -1,
       hidePast: false
@@ -134,28 +144,21 @@ export default {
       this.getData();
     },
     getData() {
-      listSemesters(true).then(resp => {
+      return listSemesters(true).then(resp => {
         console.log(resp);
         this.data = resp;
       });
     },
-    // 触发搜索按钮
     handleSearch() {
-      this.$set(this.query, "pageIndex", 1);
+      this.query.pageIndex = 1;
       this.getData();
     },
     // 删除操作
-    handleDelete(index) {
-      // 二次确认删除
-      this.$confirm("确定要删除吗？", "提示", {
-        type: "warning"
-      })
-          .then(() => {
-            this.$message.success("删除成功");
-            this.data.splice(index, 1);
-          })
-          .catch(() => {
-          });
+    handleDelete(index, row) {
+      deleteSemester(row.start_date).then(() => {
+        this.$message.success("删除成功");
+        this.data.splice(index, 1);
+      }).then(this.getData);
     },
     // 多选操作
     handleSelectionChange(val) {
@@ -172,6 +175,7 @@ export default {
       this.multipleSelection = [];
     },
     handleAdd() {
+      this.form={};
       this.addVisible = true;
     },
     // 编辑操作
@@ -180,16 +184,17 @@ export default {
       this.form = row;
       this.editVisible = true;
     },
-    // 保存编辑
-    saveEdit() {
-      this.editVisible = false;
-      this.$message.success(`修改第 ${this.idx + 1} 行成功`);
-      this.$set(this.data, this.idx, this.form);
+    saveAdd() {
+      addSemester(this.form).then(this.getData).then(()=>{
+        this.addVisible = false;
+        this.$message.success(`新增成功`);
+      })
     },
-    // 分页导航
-    handlePageChange(val) {
-      this.$set(this.query, "pageIndex", val);
-      this.getData();
+    saveEdit() {
+      updateSemester(this.form).then(this.getData).then(()=>{
+        this.editVisible = false;
+        this.$message.success(`新增成功`);
+      })
     }
   }
 };
