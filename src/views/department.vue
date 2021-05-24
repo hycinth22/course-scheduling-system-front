@@ -9,7 +9,7 @@
     </div>
     <div class="container">
       <div class="handle-box">
-        <el-button type="primary" icon="el-icon-lx-add" @click="handleAdd" class="mr10">新增</el-button>
+        <el-button type="primary" icon="el-icon-lx-forward" @click="importVisible=true" class="mr10">导入Excel</el-button>
         <el-input v-model="query.search" placeholder="编号/名称" class="handle-input mr10"></el-input>
         <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
       </div>
@@ -28,12 +28,6 @@
         <el-table-column prop="dept_name" label="系名称" width="205"></el-table-column>
         <el-table-column label="操作" width="180" align="center">
           <template #default="scope">
-            <el-button
-                type="text"
-                icon="el-icon-edit"
-                @click="handleEdit(scope.$index, scope.row)"
-            >编辑
-            </el-button>
             <el-popconfirm title="确定删除吗？" @confirm="handleDelete(scope.$index, scope.row)">
               <template #reference>
                 <el-button type="text" icon="el-icon-delete" class="red">删除</el-button>
@@ -52,41 +46,30 @@
             @current-change="handlePageChange"
         ></el-pagination>
       </div>
+      <!-- 导入弹出框 -->
+      <el-dialog title="导入excel表格" v-model="importVisible" width="30%">
+        <el-upload drag :action="uploadCollegeExcelURL" name="collegeExcel" multiple>
+          <i class="el-icon-upload"></i>
+          <div class="el-upload__text">
+            将学院文件拖到此处，或
+            <em>点击上传</em>
+          </div>
+          <template #tip>
+            <div class="el-upload__tip">只能上传 xls/xlsx 文件</div>
+          </template>
+        </el-upload>
+        <el-upload drag :action="uploadDepartmentExcelURL" name="departmentExcel" multiple>
+          <i class="el-icon-upload"></i>
+          <div class="el-upload__text">
+            将系文件拖到此处，或
+            <em>点击上传</em>
+          </div>
+          <template #tip>
+            <div class="el-upload__tip">只能上传 xls/xlsx 文件</div>
+          </template>
+        </el-upload>
+      </el-dialog>
     </div>
-
-    <!-- 编辑弹出框 -->
-    <el-dialog title="新增" v-model="addVisible" width="30%">
-      <el-form ref="form" :model="form" label-width="70px">
-        <el-form-item label="编号">
-          <el-input v-model="form.dept_id"></el-input>
-        </el-form-item>
-        <el-form-item label="名称">
-          <el-input v-model="form.dept_name"></el-input>
-        </el-form-item>
-      </el-form>
-      <template #footer>
-                <span class="dialog-footer">
-                    <el-button @click="addVisible = false">取 消</el-button>
-                    <el-button type="primary" @click="saveAdd">确 定</el-button>
-                </span>
-      </template>
-    </el-dialog>
-    <el-dialog title="编辑" v-model="editVisible" width="30%">
-      <el-form ref="form" :model="form" label-width="70px">
-        <el-form-item label="编号">
-          <el-input v-model="form.dept_id" disabled></el-input>
-        </el-form-item>
-        <el-form-item label="名称">
-          <el-input v-model="form.dept_name"></el-input>
-        </el-form-item>
-      </el-form>
-      <template #footer>
-                <span class="dialog-footer">
-                    <el-button @click="editVisible = false">取 消</el-button>
-                    <el-button type="primary" @click="saveEdit">确 定</el-button>
-                </span>
-      </template>
-    </el-dialog>
   </div>
 </template>
 
@@ -98,6 +81,9 @@ import {
   deleteDepartment,
   uploadDepartmentExcelURL
 } from "../api/dept";
+import {
+  uploadCollegeExcelURL,
+} from "../api/college";
 
 export default {
   data() {
@@ -140,7 +126,10 @@ export default {
     this.getData();
   },
   computed: {
-    uploadExcelURL() {
+    uploadCollegeExcelURL() {
+      return uploadCollegeExcelURL()
+    },
+    uploadDepartmentExcelURL() {
       return uploadDepartmentExcelURL()
     }
   },

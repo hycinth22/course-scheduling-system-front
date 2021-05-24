@@ -1,4 +1,4 @@
-import request from "../utils/request";
+import request, {getURL} from "../utils/request";
 
 export const listColleges = () => {
     return request({
@@ -7,3 +7,7 @@ export const listColleges = () => {
         params: []
     });
 };
+
+export const uploadCollegeExcelURL = () => {
+    return getURL("/college/excel");
+}
