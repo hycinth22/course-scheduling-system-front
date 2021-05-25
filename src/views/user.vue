@@ -318,7 +318,7 @@ export default {
       })
     },
     saveEdit() {
-      updateUser(this.form).then(()=>{
+      updateUser(this.form).then(this.getData).then(()=>{
         this.editVisible = false;
         this.$message.success(`新增成功`);
       })

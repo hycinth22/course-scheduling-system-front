@@ -1,4 +1,4 @@
-import request from "../utils/request";
+import request, {getURL} from "../utils/request";
 
 export const listTeachers = query => {
     return request({
@@ -40,3 +40,7 @@ export const listTeachersInCollege = (college_id) => {
         }
     });
 };
+
+export const uploadTeacherExcelURL = () => {
+    return getURL("/teacher/excel");
+}

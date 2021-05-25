@@ -17,6 +17,7 @@
         <el-input v-model="query.name" placeholder="编号/班级名" class="handle-input mr10"></el-input>
         <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
         <el-button type="danger" icon="el-icon-delete" class="handle-del mr10" @click="delAllSelection">删除选中条目</el-button>
+        <el-button type="primary" icon="el-icon-lx-forward" @click="importVisible=true" class="mr10">导入Excel</el-button>
       </div>
       <el-table
           :data="tableData"
@@ -30,7 +31,7 @@
         <el-table-column prop="clazz_id" label="编号" width="85" align="center"></el-table-column>
         <el-table-column prop="college.college_name" label="所属学院"></el-table-column>
         <el-table-column prop="clazz_name" label="名称"></el-table-column>
-        <el-table-column prop="spec" label="所属专业"></el-table-column>
+<!--        <el-table-column prop="spec" label="所属专业"></el-table-column>-->
 
         <el-table-column label="操作" width="180" align="center">
           <template #default="scope">
@@ -117,11 +118,30 @@
                 </span>
       </template>
     </el-dialog>
+    <!-- 导入弹出框 -->
+    <el-dialog title="导入excel表格" v-model="importVisible" width="30%">
+      <el-upload
+          drag
+          :action="uploadExcelURL"
+          name="excel"
+          multiple
+          @on-success="getData"
+      >
+        <i class="el-icon-upload"></i>
+        <div class="el-upload__text">
+          将班级Excel文件拖到此处，或
+          <em>点击上传</em>
+        </div>
+        <template #tip>
+          <div class="el-upload__tip">只能上传 xls/xlsx 文件</div>
+        </template>
+      </el-upload>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import {listClazzes} from "../api/clazz";
+import {listClazzes, uploadClazzExcelURL} from "../api/clazz";
 
 export default {
   data() {
@@ -136,6 +156,7 @@ export default {
       delList: [],
       addVisible: false,
       editVisible: false,
+      importVisible: false,
       pageTotal: 0,
       form: {},
       idx: -1,
@@ -144,6 +165,11 @@ export default {
   },
   created() {
     this.getData();
+  },
+  computed: {
+    uploadExcelURL() {
+      return uploadClazzExcelURL();
+    }
   },
   methods: {
     // 获取 easy-mock 的模拟数据
@@ -205,7 +231,7 @@ export default {
     handlePageChange(val) {
       this.$set(this.query, "pageIndex", val);
       this.getData();
-    }
+    },
   }
 };
 </script>
@@ -213,10 +239,6 @@ export default {
 <style scoped>
 .handle-box {
   margin-bottom: 20px;
-}
-
-.handle-select {
-  width: 120px;
 }
 
 .handle-input {

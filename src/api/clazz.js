@@ -1,4 +1,4 @@
-import request from "../utils/request";
+import request, {getURL} from "../utils/request";
 
 export const listClazzesInCollege = (college_id) => {
     return request({
@@ -17,3 +17,8 @@ export const listClazzes = query => {
         params: query
     });
 };
+
+
+export const uploadClazzExcelURL = () => {
+    return getURL("/clazz/excel");
+}

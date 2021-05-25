@@ -148,8 +148,8 @@
       >
         <i class="el-icon-upload"></i>
         <div class="el-upload__text">
-          将文件拖到此处，或
-          <em>点击上传</em>
+          将 课程Excel文件 拖到此处，或
+          <em>点击上传 课程Excel文件</em>
         </div>
         <template #tip>
           <div class="el-upload__tip">只能上传 xls/xlsx 文件</div>

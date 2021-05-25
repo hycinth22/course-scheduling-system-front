@@ -24,6 +24,7 @@
             @click="delAllSelection"
         >删除选中条目
         </el-button>
+        <el-button type="primary" icon="el-icon-lx-forward" @click="importVisible=true" class="mr10">导入Excel</el-button>
       </div>
       <el-table
           :data="tableData"
@@ -122,11 +123,30 @@
                 </span>
       </template>
     </el-dialog>
+    <!-- 导入弹出框 -->
+    <el-dialog title="导入excel表格" v-model="importVisible" width="30%">
+      <el-upload
+          drag
+          :action="uploadExcelURL"
+          name="excel"
+          multiple
+          @on-success="getData"
+      >
+        <i class="el-icon-upload"></i>
+        <div class="el-upload__text">
+          将教师Excel文件拖到此处，或
+          <em>点击上传</em>
+        </div>
+        <template #tip>
+          <div class="el-upload__tip">只能上传 xls/xlsx 文件</div>
+        </template>
+      </el-upload>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import {listTeachers, addTeacher, updateTeacher, deleteTeacher} from "../api/teacher";
+import {listTeachers, addTeacher, updateTeacher, deleteTeacher, uploadTeacherExcelURL} from "../api/teacher";
 
 export default {
   data() {
@@ -142,6 +162,7 @@ export default {
       delList: [],
       addVisible: false,
       editVisible: false,
+      importVisible: false,
       pageTotal: 0,
       form: {
         "teacher_id": "10006",
@@ -160,6 +181,11 @@ export default {
       id_edit: -1,
       id: -1
     };
+  },
+  computed: {
+    uploadExcelURL() {
+      return uploadTeacherExcelURL();
+    }
   },
   created() {
     this.getData();
@@ -274,10 +300,6 @@ export default {
   margin-bottom: 20px;
 }
 
-.handle-select {
-  width: 120px;
-}
-
 .handle-input {
   width: 300px;
   display: inline-block;
@@ -294,12 +316,5 @@ export default {
 
 .mr10 {
   margin-right: 10px;
-}
-
-.table-td-thumb {
-  display: block;
-  margin: auto;
-  width: 40px;
-  height: 40px;
 }
 </style>
