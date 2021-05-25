@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-loading="loading">
     <div class="crumbs">
       <el-breadcrumb separator="/">
         <el-breadcrumb-item>
@@ -118,7 +118,8 @@ export default {
       },
       idx: -1,
       id: -1,
-      hidePast: false
+      hidePast: false,
+      loading: false,
     };
   },
   created() {
@@ -155,9 +156,11 @@ export default {
     },
     // 删除操作
     handleDelete(index, row) {
+      this.loading = true;
       deleteSemester(row.start_date).then(() => {
-        this.$message.success("删除成功");
         this.data.splice(index, 1);
+        this.loading = false;
+        this.$message.success("删除成功");
       }).then(this.getData);
     },
     // 多选操作

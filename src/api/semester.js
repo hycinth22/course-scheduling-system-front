@@ -45,7 +45,8 @@ export const updateSemester = obj => {
 
 export const deleteSemester = start_date => {
     return request({
-        url: base + '/' + start_date,
+        url: base,
         method: 'delete',
+        params: {start_date: start_date},
     });
 };
