@@ -33,7 +33,7 @@
       <div class="">
         <p>方案查看区</p>
         <br>
-        <p>方案 {{query.scheduleID}} 的分数为：{{ planScore.toFixed(3) }}（越低表示越好）</p>
+        <p>方案 {{ query.scheduleID }} 的分数为：{{ planScore.toFixed(3) }}（越低表示越好）</p>
         <el-tabs tab-position="left">
           <el-tab-pane label="学生课表" name="first">
             <div class="handle-box">
@@ -222,12 +222,12 @@
 </template>
 
 <script>
-import {listSemesters} from "../api/semester";
+import {getSelectedSemester, listSemesters} from "../api/semester";
 import {
   listSchedulesInSemester, listSchedulesItemsGroupView,
   createNewSchedule, deleteSchedule, deleteScheduleInSemester,
   downloadStudentExcelURL, downloadTeacherExcelURL, downloadTeacherPersonalExcelURL,
-    saveSelectedSchedule
+  saveSelectedSchedule
 } from "../api/schduling";
 import {listColleges} from "../api/college";
 import {listClazzesInCollege} from "../api/clazz";
@@ -372,9 +372,11 @@ export default {
     };
   },
   created() {
-    this.loading=true;
-    Promise.all([this.loadSemesters(), this.loadColleges()]).then(()=>{
-      this.loading=false;
+    this.loading = true;
+    Promise.all([this.loadSemesters(), this.loadColleges(), getSelectedSemester().then(resp => {
+      this.query.semesterID = resp.selected;
+    })]).then(() => {
+      this.loading = false;
     });
   },
   watch: {
@@ -392,7 +394,7 @@ export default {
   },
   methods: {
     handleAddSchedule() {
-      this.loading=true;
+      this.loading = true;
       createNewSchedule(this.query.semesterID).then(resp => {
         this.schedules.push({
           "schedule_id": resp.schedule_id,
@@ -403,14 +405,14 @@ export default {
           }
         });
         this.query.scheduleID = resp.schedule_id;
-        this.loading=false;
+        this.loading = false;
         this.$message.success("新建方案成功，已选择新方案");
       });
     },
     handleDeleteSchedule(schedule_id) {
-      this.loading=true;
+      this.loading = true;
       deleteSchedule(schedule_id).then(() => {
-          this.loading=false;
+            this.loading = false;
             this.clazzData = [];
             this.deptData = [];
             this.$message.success("删除成功");

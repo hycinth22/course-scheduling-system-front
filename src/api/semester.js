@@ -50,3 +50,10 @@ export const deleteSemester = start_date => {
         params: {start_date: start_date},
     });
 };
+
+export const getSelectedSemester = () => {
+    return request({
+        url: base + '/selected',
+        method: 'get',
+    });
+};

@@ -122,7 +122,7 @@
 import {listInstructs, listInstructsClazzes} from "../api/instruct";
 import {listClazzes} from "../api/clazz";
 import {deleteTeacher} from "../api/teacher";
-import {listSemesters} from "../api/semester";
+import {getSelectedSemester, listSemesters} from "../api/semester";
 
 export default {
   data() {
@@ -152,6 +152,9 @@ export default {
   },
   created() {
     this.getData();
+    getSelectedSemester().then(resp=>{
+      this.query.semesterID=resp.selected;
+    });
   },
   watch: {
     "query.semesterID": function()  {
