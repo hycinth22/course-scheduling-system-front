@@ -11,12 +11,13 @@ export const listSchedulesInSemester = (semester_date) => {
     });
 };
 
-export const createNewSchedule = (semester_date) => {
+export const createNewSchedule = (semester_date, evaluatorKeys) => {
     return request({
         url: '/schedule/new',
         method: 'get',
         params: {
-            semester_date: semester_date
+            semester_date: semester_date,
+            evaluators: evaluatorKeys,
         },
         timeout: 60000,
     });
@@ -78,3 +79,12 @@ export const saveSelectedSchedule = (semester_date, schedule_id) => {
         },
     });
 };
+
+export const getEvaluatorList = () => {
+    return request({
+        url: '/schedule/evaluator_list',
+        method: 'get',
+        params: {},
+    });
+};
+

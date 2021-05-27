@@ -9,7 +9,7 @@
           :action="uploadBackupURL"
           name="backupFile"
           multiple
-          @on-success="loadList"
+          @on-change="uploadSuccess"
           accept=".sql"
       >
         <i class="el-icon-upload"></i>
@@ -97,6 +97,12 @@ export default {
         this.selected = null;
         this.loading = false;
         this.$message.success("恢复成功");
+      });
+    },
+    uploadSuccess() {
+      this.loading = true;
+      this.loadList().then(()=>{
+        this.loading = false;
       });
     },
     loadList() {

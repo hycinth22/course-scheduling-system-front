@@ -25,7 +25,7 @@
               :value="item.schedule_id">
           </el-option>
         </el-select>
-        <el-button type="primary" icon="el-icon-lx-add" @click="handleAddSchedule" class="mr10">新增方案</el-button>
+        <el-button type="primary" icon="el-icon-lx-add" @click="addVisible=true" class="mr10">新增方案</el-button>
         <el-button type="danger" icon="el-icon-lx-delete" @click="handleDeleteAllSchedule" class="mr10">清空所有方案
         </el-button>
       </div>
@@ -217,7 +217,20 @@
       </div>
     </div>
 
-    <!-- 编辑弹出框 -->
+    <!-- 新增弹出框 -->
+    <el-dialog title="新增排课方案" v-model="addVisible" width="500px">
+      <p>目标学期：{{ curSemester.semester_name }}{{ start_date}}</p>
+      <p>选择约束条件：</p>
+      <el-checkbox-group v-model="checked_evaluators">
+        <el-checkbox v-for="(item) in evaluators" :key="item.key"
+            :label="item.explain"></el-checkbox>
+      </el-checkbox-group>
+      <template #footer>
+                <span class="dialog-footer">
+                    <el-button type="primary" @click="handleAddSchedule">生成新方案</el-button>
+                </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -227,7 +240,8 @@ import {
   listSchedulesInSemester, listSchedulesItemsGroupView,
   createNewSchedule, deleteSchedule, deleteScheduleInSemester,
   downloadStudentExcelURL, downloadTeacherExcelURL, downloadTeacherPersonalExcelURL,
-  saveSelectedSchedule
+  saveSelectedSchedule,
+  getEvaluatorList
 } from "../api/schduling";
 import {listColleges} from "../api/college";
 import {listClazzesInCollege} from "../api/clazz";
@@ -369,13 +383,16 @@ export default {
       ],
       entireData: [],
       k: 0,
+      addVisible: false,
+      evaluators: [],
+      checked_evaluators: [],
     };
   },
   created() {
     this.loading = true;
     Promise.all([this.loadSemesters(), this.loadColleges(), getSelectedSemester().then(resp => {
       this.query.semesterID = resp.selected;
-    })]).then(() => {
+    }), this.loadEvaluators()]).then(() => {
       this.loading = false;
     });
   },
@@ -394,8 +411,9 @@ export default {
   },
   methods: {
     handleAddSchedule() {
+      this.addVisible = false;
       this.loading = true;
-      createNewSchedule(this.query.semesterID).then(resp => {
+      createNewSchedule(this.query.semesterID, this.checkedEvaluatorKeys).then(resp => {
         this.schedules.push({
           "schedule_id": resp.schedule_id,
           "semester": {
@@ -437,6 +455,12 @@ export default {
     loadSemesters() {
       return listSemesters().then(resp => {
         this.semesters = resp;
+      });
+    },
+    loadEvaluators() {
+      return getEvaluatorList().then(resp => {
+        this.evaluators = resp;
+        this.checked_evaluators = resp.map(elem=>elem.explain);
       });
     },
     loadSchedulesList(semester) {
@@ -557,6 +581,18 @@ table td, table th {
     },
     downloadTeacherPersonalExcel() {
       return downloadTeacherPersonalExcelURL(this.query.scheduleID, this.query.teacherID)
+    },
+    checkedEvaluatorKeys() {
+      return this.checked_evaluators.map((item)=>{
+        return this.evaluators.find((x)=>{
+          return x.explain === item;
+        }).key;
+      })
+    },
+    curSemester() {
+      return this.semesters.find((x)=>{
+        return x.start_date === this.query.semesterID;
+      });
     },
   }
 };
