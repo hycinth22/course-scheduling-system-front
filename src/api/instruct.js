@@ -1,4 +1,4 @@
-import request from '../utils/request';
+import request, {getURL} from '../utils/request';
 
 export const listInstructs = query => {
     return request({
@@ -40,3 +40,20 @@ export const listInstructsClazzes = instruct_id => {
         params: {"instruct_id": instruct_id}
     });
 };
+
+export const resetInstructsClazzes = (instruct_id, list) => {
+    return request({
+        url: '/instruct/instructed_clazzes',
+        method: 'put',
+        params: {"instruct_id": instruct_id},
+        data: list,
+    });
+};
+
+export const uploadInstructExcelURL = () => {
+    return getURL("/instruct/excel");
+}
+
+export const uploadInstructClazzesExcelURL = () => {
+    return getURL("/instruct/instructed_clazzes/excel");
+}

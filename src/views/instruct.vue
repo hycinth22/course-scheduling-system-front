@@ -17,8 +17,8 @@
               :value="item.start_date">
           </el-option>
         </el-select>
-        <el-button type="primary" icon="el-icon-lx-add" @click="handleAdd" class="mr10">新增</el-button>
-        <el-input v-model="query.name" placeholder="课程编号/课程名/开课老师" class="handle-input mr10"></el-input>
+        <el-button type="primary" icon="el-icon-lx-forward" @click="importVisible=true" class="mr10">导入Excel</el-button>
+        <el-input v-model="query.search" placeholder="课程编号/课程名/开课老师" class="handle-input mr10"></el-input>
         <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
         <el-button
             type="danger"
@@ -53,12 +53,12 @@
         </el-table-column>
         <el-table-column label="操作" width="180" align="center">
           <template #default="scope">
-            <el-button
-                type="text"
-                icon="el-icon-edit"
-                @click="handleEdit(scope.$index, scope.row)"
-            >编辑
-            </el-button>
+<!--            <el-button-->
+<!--                type="text"-->
+<!--                icon="el-icon-edit"-->
+<!--                @click="handleEdit(scope.$index, scope.row)"-->
+<!--            >编辑-->
+<!--            </el-button>-->
             <el-button
                 type="text"
                 icon="el-icon-delete"
@@ -107,19 +107,43 @@
           :filter-method="clazzFilterMethod"
           filter-placeholder="搜索班级"
           :data="clazzData"
-          :titles="['全部班级', '已选课班级']"
+          :titles="['未选课班级', '已选课班级']"
       />
       <template #footer>
                 <span class="dialog-footer">
-                    <el-button type="primary" @click="clazzVisible = false">确 定</el-button>
+                    <el-button type="primary" @click="handleSaveClazzes()">确 定</el-button>
                 </span>
       </template>
+    </el-dialog>
+    <!-- 导入弹出框 -->
+    <el-dialog title="导入excel表格" v-model="importVisible" width="30%">
+      <el-upload drag :action="uploadInstructExcelURL" name="excel" multiple>
+        <i class="el-icon-upload"></i>
+        <div class="el-upload__text">
+          将开课信息文件拖到此处，或
+          <em>点击上传</em>
+        </div>
+        <template #tip>
+          <div class="el-upload__tip">只能上传 xls/xlsx 文件</div>
+        </template>
+      </el-upload>
+      <el-upload drag :action="uploadInstructClazzesExcelURL" name="excel" multiple>
+        <i class="el-icon-upload"></i>
+        <div class="el-upload__text">
+          将选课信息文件拖到此处，或
+          <em>点击上传</em>
+        </div>
+        <template #tip>
+          <div class="el-upload__tip">只能上传 xls/xlsx 文件</div>
+        </template>
+      </el-upload>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import {listInstructs, listInstructsClazzes} from "../api/instruct";
+import {listInstructs, listInstructsClazzes, resetInstructsClazzes,
+  uploadInstructExcelURL, uploadInstructClazzesExcelURL} from "../api/instruct";
 import {listClazzes} from "../api/clazz";
 import {deleteTeacher} from "../api/teacher";
 import {getSelectedSemester, listSemesters} from "../api/semester";
@@ -141,6 +165,7 @@ export default {
       addVisible: false,
       editVisible: false,
       clazzVisible: false,
+      importVisible: false,
       pageTotal: 0,
       form: {},
       idx: -1,
@@ -149,6 +174,14 @@ export default {
       selected_clazz: [],
       selClazzTitle: "选课信息",
     };
+  },
+  computed: {
+    uploadInstructExcelURL() {
+      return uploadInstructExcelURL();
+    },
+    uploadInstructClazzesExcelURL() {
+      return uploadInstructClazzesExcelURL();
+    },
   },
   created() {
     this.getData();
@@ -258,7 +291,25 @@ export default {
       listInstructs(this.query).then(res => {
         console.log(res);
         this.tableData = res.list;
-        this.pageTotal = res.pageTotal || 50;
+        this.pageTotal = res.pageTotal;
+      });
+    },
+    handleSaveClazzes() {
+      const instruct = this.form;
+      const instruct_id = instruct.instruct_id;
+      resetInstructsClazzes(instruct_id, this.selected_clazz.map(clazz_id=>{
+        return {
+          id: 0,
+          clazz: {
+            clazz_id: clazz_id,
+          },
+          instruct: {
+            instruct_id: instruct_id,
+          }
+        }
+      })).then(this.getData).then(()=>{
+        this.$message.success(`修改${instruct.course.name}（${instruct.teacher.teacher_name}）开课的选课班级列表成功`);
+        this.clazzVisible = false;
       });
     }
   }
