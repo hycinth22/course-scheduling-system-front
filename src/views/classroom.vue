@@ -9,11 +9,11 @@
     </div>
     <div class="container">
       <div class="handle-box">
-        <el-button type="primary" icon="el-icon-lx-add" @click="handleAdd" class="mr10">新增</el-button>
+        <el-button type="primary" icon="el-icon-lx-add" @click="handleAdd" class="mr10" v-if="canEdit">新增</el-button>
         <el-input v-model="query.search" placeholder="教学楼/教室号" class="handle-input mr10"></el-input>
         <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
-        <el-button type="danger" icon="el-icon-delete" class="handle-del mr10" @click="delAllSelection">删除选中条目</el-button>
-        <el-button type="primary" icon="el-icon-lx-forward" @click="importVisible=true" class="mr10">导入Excel</el-button>
+        <el-button type="danger" icon="el-icon-delete" class="handle-del mr10" @click="delAllSelection" v-if="canEdit">删除选中条目</el-button>
+        <el-button type="primary" icon="el-icon-lx-forward" @click="importVisible=true" class="mr10" v-if="canEdit">导入Excel</el-button>
       </div>
       <el-table
           :data="tableData"
@@ -23,11 +23,11 @@
           header-cell-class-name="table-header"
           @selection-change="handleSelectionChange"
       >
-        <el-table-column type="selection" width="55" align="center"></el-table-column>
+        <el-table-column type="selection" width="55" align="center" v-if="canEdit"></el-table-column>
         <el-table-column prop="id" label="序号" width="55" align="center"></el-table-column>
         <el-table-column prop="building" label="教学楼" width="405" align="center"></el-table-column>
         <el-table-column prop="room" label="教室号" width="405" align="center"></el-table-column>
-        <el-table-column label="操作" width="180" align="center">
+        <el-table-column label="操作" width="180" align="center" v-if="canEdit">
           <template #default="scope">
             <el-button
                 type="text"
@@ -122,6 +122,7 @@ import {
   updateClassroom,
   uploadClassroomExcelURL
 } from "../api/clazzroom";
+import {getUser} from "../login_state";
 
 export default {
   data() {
@@ -157,8 +158,11 @@ export default {
   },
   computed: {
     uploadExcelURL() {
-      return uploadClassroomExcelURL()
-    }
+      return uploadClassroomExcelURL();
+    },
+    canEdit() {
+      return getUser().role!=='teacher';
+    },
   },
   methods: {
     getData() {

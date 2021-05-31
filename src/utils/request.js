@@ -3,7 +3,8 @@ import axios from 'axios';
 function createService(root) {
     let service = axios.create({
         baseURL: root,
-        timeout: 5000
+        timeout: 5000,
+        withCredentials: true,
     });
     service.interceptors.response.use(
         response => {

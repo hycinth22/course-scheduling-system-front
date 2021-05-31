@@ -17,7 +17,7 @@
               :value="item.start_date">
           </el-option>
         </el-select>
-        <el-button type="primary" icon="el-icon-lx-forward" @click="importVisible=true" class="mr10">导入Excel</el-button>
+        <el-button type="primary" icon="el-icon-lx-forward" @click="importVisible=true" class="mr10" v-if="canEdit">导入Excel</el-button>
         <el-input v-model="query.search" placeholder="课程编号/课程名/开课老师" class="handle-input mr10"></el-input>
         <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
         <el-button
@@ -25,6 +25,7 @@
             icon="el-icon-delete"
             class="handle-del mr10"
             @click="delAllSelection"
+            v-if="canEdit"
         >批量删除
         </el-button>
       </div>
@@ -51,7 +52,7 @@
             </el-button>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="180" align="center">
+        <el-table-column label="操作" width="180" align="center" v-if="canEdit">
           <template #default="scope">
 <!--            <el-button-->
 <!--                type="text"-->

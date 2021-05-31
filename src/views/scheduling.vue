@@ -9,31 +9,55 @@
     </div>
     <div class="container">
       <div class="handle-box">
-        <el-select v-model="query.semesterID" placeholder="选择学期" class="handle-select mr10">
-          <el-option
-              v-for="item in semesters"
-              :key="item.start_date"
-              :label="item.semester_name"
-              :value="item.start_date">
-          </el-option>
-        </el-select>
-        <el-select v-model="query.scheduleID" placeholder="选择方案" class="handle-select mr10">
-          <el-option
-              v-for="item in schedules"
-              :key="item.schedule_id"
-              :label="'方案'+item.schedule_id"
-              :value="item.schedule_id">
-          </el-option>
-        </el-select>
-        <el-button type="primary" icon="el-icon-lx-add" @click="addVisible=true" class="mr10">新增方案</el-button>
-        <el-button type="danger" icon="el-icon-lx-delete" @click="handleDeleteAllSchedule" class="mr10">清空所有方案
+        <div v-if="canEdit">
+          <el-select v-model="query.semesterID" placeholder="选择学期" class="handle-select mr10 mb10"
+                     @change="loadSchedulesList(query.semesterID)">
+            <el-option
+                v-for="item in semesters"
+                :key="item.start_date"
+                :label="item.semester_name"
+                :value="item.start_date">
+            </el-option>
+          </el-select>
+          <el-select v-model="query.scheduleID" placeholder="选择方案" class="handle-select mr10 mb10"
+                     @change="handleScheduleChanged(query.scheduleID)">
+            <el-option
+                v-for="item in schedules"
+                :key="item.schedule_id"
+                :label="'方案'+item.schedule_id"
+                :value="item.schedule_id">
+            </el-option>
+          </el-select>
+        </div>
+        <div v-else>
+          <el-select v-model="query.semesterID" placeholder="选择学期" class="handle-select mr10 mb10" disabled>
+            <el-option
+                v-for="item in semesters"
+                :key="item.start_date"
+                :label="item.semester_name"
+                :value="item.start_date">
+            </el-option>
+          </el-select>
+          <el-select v-model="query.scheduleID" placeholder="选择方案" class="handle-select mr10 mb10" disabled>
+            <el-option
+                v-for="item in schedules"
+                :key="item.schedule_id"
+                :label="'方案'+item.schedule_id"
+                :value="item.schedule_id">
+            </el-option>
+          </el-select>
+        </div>
+        <el-button type="primary" icon="el-icon-lx-add" @click="addVisible=true" class="mr10" v-if="canEdit">新增方案
+        </el-button>
+        <el-button type="danger" icon="el-icon-lx-delete" @click="handleDeleteAllSchedule" class="mr10" v-if="canEdit">
+          清空所有方案
         </el-button>
       </div>
       <el-divider></el-divider>
       <div class="">
         <p>方案查看区</p>
         <br>
-        <p>方案 {{ query.scheduleID }} 的分数为：{{ planScore.toFixed(3) }}（越低表示越好）</p>
+        <p v-if="canEdit">方案 {{ query.scheduleID }} 的分数为：{{ planScore.toFixed(3) }}（越低表示越好）</p>
         <el-tabs tab-position="left">
           <el-tab-pane label="学生课表" name="first">
             <div class="handle-box">
@@ -203,7 +227,7 @@
         </el-tabs>
       </div>
       <el-divider></el-divider>
-      <div>
+      <div v-if="canEdit">
         当前方案操作：
         <el-popconfirm title="确定删除吗？" @confirm="handleDeleteSchedule(query.scheduleID)">
           <template #reference>
@@ -219,11 +243,11 @@
 
     <!-- 新增弹出框 -->
     <el-dialog title="新增排课方案" v-model="addVisible" width="500px">
-      <p>目标学期：{{ curSemester.semester_name }}{{ start_date}}</p>
+      <p>目标学期：{{ curSemester.semester_name }}{{ start_date }}</p>
       <p>选择约束条件：</p>
       <el-checkbox-group v-model="checked_evaluators">
         <el-checkbox v-for="(item) in evaluators" :key="item.key"
-            :label="item.explain"></el-checkbox>
+                     :label="item.explain"></el-checkbox>
       </el-checkbox-group>
       <template #footer>
                 <span class="dialog-footer">
@@ -235,18 +259,19 @@
 </template>
 
 <script>
-import {getSelectedSemester, listSemesters} from "../api/semester";
+import {listSemesters} from "../api/semester";
 import {
   listSchedulesInSemester, listSchedulesItemsGroupView,
   createNewSchedule, deleteSchedule, deleteScheduleInSemester,
   downloadStudentExcelURL, downloadTeacherExcelURL, downloadTeacherPersonalExcelURL,
   saveSelectedSchedule,
-  getEvaluatorList
+  getEvaluatorList, getSelectedSchedule
 } from "../api/schduling";
 import {listColleges} from "../api/college";
 import {listClazzesInCollege} from "../api/clazz";
 import {listDepartmentsInCollege} from "../api/dept";
 import {listTeachersInCollege} from "../api/teacher";
+import {getUser} from "../login_state";
 
 export default {
   data() {
@@ -386,30 +411,35 @@ export default {
       addVisible: false,
       evaluators: [],
       checked_evaluators: [],
+      usingScheduleID: 0,
     };
   },
   created() {
     this.loading = true;
-    Promise.all([this.loadSemesters(), this.loadColleges(), getSelectedSemester().then(resp => {
-      this.query.semesterID = resp.selected;
-    }), this.loadEvaluators()]).then(() => {
+    Promise.all([this.loadSemesters(), this.loadColleges(), getSelectedSchedule().then(resp => {
+      this.query.semesterID = resp.selected_semester;
+      this.usingScheduleID = resp.selected_schedule;
+      return resp.selected_semester;
+    }).then(this.loadSchedulesList).then(() => {
+      this.query.scheduleID = this.usingScheduleID;
+      this.form.enabled = true;
+      return this.usingScheduleID;
+    }).then(this.loadSchedulesItems), this.loadEvaluators()]).then(() => {
       this.loading = false;
     });
   },
   watch: {
-    "query.semesterID": function () {
-      this.loadSchedulesList(this.query.semesterID);
-    },
     "query.collegeID": function () {
       this.loadClazzes(this.query.collegeID);
       this.loadDepartments(this.query.collegeID);
       this.loadTeachers(this.query.collegeID);
     },
-    "query.scheduleID": function () {
-      this.loadSchedulesItems(this.query.scheduleID);
-    },
   },
   methods: {
+    handleScheduleChanged(scheduleID) {
+      this.form.enabled = (scheduleID === this.usingScheduleID);
+      this.loadSchedulesItems(scheduleID);
+    },
     handleAddSchedule() {
       this.addVisible = false;
       this.loading = true;
@@ -460,7 +490,7 @@ export default {
     loadEvaluators() {
       return getEvaluatorList().then(resp => {
         this.evaluators = resp;
-        this.checked_evaluators = resp.map(elem=>elem.explain);
+        this.checked_evaluators = resp.map(elem => elem.explain);
       });
     },
     loadSchedulesList(semester) {
@@ -583,16 +613,19 @@ table td, table th {
       return downloadTeacherPersonalExcelURL(this.query.scheduleID, this.query.teacherID)
     },
     checkedEvaluatorKeys() {
-      return this.checked_evaluators.map((item)=>{
-        return this.evaluators.find((x)=>{
+      return this.checked_evaluators.map((item) => {
+        return this.evaluators.find((x) => {
           return x.explain === item;
         }).key;
       })
     },
     curSemester() {
-      return this.semesters.find((x)=>{
+      return this.semesters.find((x) => {
         return x.start_date === this.query.semesterID;
       });
+    },
+    canEdit() {
+      return getUser().role !== 'teacher';
     },
   }
 };
@@ -616,6 +649,11 @@ table td, table th {
 .mr10 {
   margin-right: 10px;
 }
+
+.mb10 {
+  margin-bottom: 10px;
+}
+
 </style>
 <style>
 /* noinspection  CssUnusedSymbol */

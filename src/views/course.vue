@@ -9,12 +9,13 @@
     </div>
     <div class="container">
       <div class="handle-box">
-        <el-button type="primary" icon="el-icon-lx-add" @click="handleAdd" class="mr10">新增</el-button>
+        <el-button type="primary" icon="el-icon-lx-add" @click="handleAdd" class="mr10" v-if="canEdit">新增</el-button>
         <el-input v-model="query.search" placeholder="课程编号/课程名/开设单位" class="handle-input mr10"></el-input>
         <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
-        <el-button type="danger" icon="el-icon-delete" class="handle-del mr10" @click="delAllSelection">删除选中条目
+        <el-button type="danger" icon="el-icon-delete" class="handle-del mr10" @click="delAllSelection" v-if="canEdit">删除选中条目
         </el-button>
-        <el-button type="primary" icon="el-icon-lx-forward" @click="importVisible=true" class="mr10">导入Excel</el-button>
+        <el-button type="primary" icon="el-icon-lx-forward" @click="importVisible=true" class="mr10" v-if="canEdit">导入Excel
+        </el-button>
       </div>
       <el-table
           :data="tableData"
@@ -24,7 +25,7 @@
           header-cell-class-name="table-header"
           @selection-change="handleSelectionChange"
       >
-        <el-table-column type="selection" width="55" align="center"></el-table-column>
+        <el-table-column type="selection" width="55" align="center" v-if="canEdit"></el-table-column>
         <el-table-column prop="id" label="课程编号" width="105" align="center"></el-table-column>
         <el-table-column prop="name" label="课程名"></el-table-column>
         <el-table-column prop="lessons" label="总课时"></el-table-column>
@@ -32,7 +33,7 @@
         <el-table-column prop="kind" label="课程属性"></el-table-column>
         <el-table-column prop="exam_mode" label="考核方式"></el-table-column>
         <el-table-column prop="founder" label="开课单位"></el-table-column>
-        <el-table-column label="操作" width="180" align="center">
+        <el-table-column label="操作" width="180" align="center" v-if="canEdit">
           <template #default="scope">
             <el-button
                 type="text"
@@ -161,6 +162,7 @@
 
 <script>
 import {listCourses, addCourse, deleteCourse, updateCourse, uploadCourseExcelURL} from "@/api/course";
+import {getUser} from "../login_state";
 
 export default {
   data() {
@@ -211,7 +213,10 @@ export default {
   computed: {
     uploadExcelURL() {
       return uploadCourseExcelURL()
-    }
+    },
+    canEdit() {
+      return getUser().role!=='teacher';
+    },
   },
   methods: {
     getData() {

@@ -9,22 +9,23 @@
     </div>
     <div class="container">
       <div class="handle-box">
-        <el-button type="primary" icon="el-icon-lx-add" @click="handleAdd" class="mr10">新增</el-button>
+        <el-button type="primary" icon="el-icon-lx-add" @click="handleAdd" class="mr10" v-if="canEdit">新增</el-button>
         <!--        <el-select v-model="query.at" placeholder="院系" class="handle-select mr10" size="medium">-->
         <!--          <el-option key="1" label="电子信息工程-电信工程系" value="电子信息工程-电信工程系"></el-option>-->
         <!--          <el-option key="2" label="电子信息工程-通信工程系" value="电子信息工程-通信工程系"></el-option>-->
         <!--          <el-option key="2" label="电子信息工程-物联网系" value="电子信息工程-物联网系"></el-option>-->
         <!--        </el-select>-->
-        <el-input v-model="query.search" placeholder="教职工号/姓名/职称/电话" class="handle-input mr10"></el-input>
-        <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
+        <el-input v-model="query.search" placeholder="教职工号/姓名/职称/电话" class="handle-input mr10" v-if="canEdit"></el-input>
+        <el-button type="primary" icon="el-icon-search" @click="handleSearch" v-if="canEdit">搜索</el-button>
         <el-button
             type="danger"
             icon="el-icon-delete"
             class="handle-del mr10"
             @click="delAllSelection"
+            v-if="canEdit"
         >删除选中条目
         </el-button>
-        <el-button type="primary" icon="el-icon-lx-forward" @click="importVisible=true" class="mr10">导入Excel</el-button>
+        <el-button type="primary" icon="el-icon-lx-forward" @click="importVisible=true" class="mr10" v-if="canEdit">导入Excel</el-button>
       </div>
       <el-table
           :data="tableData"
@@ -34,7 +35,7 @@
           header-cell-class-name="table-header"
           @selection-change="handleSelectionChange"
       >
-        <el-table-column type="selection" width="55" align="center"></el-table-column>
+        <el-table-column type="selection" width="55" align="center" v-if="canEdit"></el-table-column>
         <el-table-column prop="teacher_id" label="教职工号" width="95" align="center"></el-table-column>
         <el-table-column prop="teacher_name" label="姓名"></el-table-column>
         <el-table-column prop="teacher_title" label="职称"></el-table-column>
@@ -55,6 +56,7 @@
                 icon="el-icon-delete"
                 class="red"
                 @click="handleDelete(scope.$index, scope.row)"
+                v-if="canEdit"
             >删除
             </el-button>
           </template>
@@ -147,13 +149,13 @@
 
 <script>
 import {listTeachers, addTeacher, updateTeacher, deleteTeacher, uploadTeacherExcelURL} from "../api/teacher";
+import {getUser} from "../login_state";
 
 export default {
   data() {
     return {
       query: {
-        address: "",
-        name: "",
+        search: "",
         pageIndex: 1,
         pageSize: 10
       },
@@ -185,7 +187,10 @@ export default {
   computed: {
     uploadExcelURL() {
       return uploadTeacherExcelURL();
-    }
+    },
+    canEdit() {
+      return getUser().role!=='teacher';
+    },
   },
   created() {
     this.getData();

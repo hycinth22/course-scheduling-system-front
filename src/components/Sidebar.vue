@@ -72,13 +72,13 @@ export default {
           icon: "el-icon-lx-calendar",
           index: "course",
           title: "课程信息管理",
-          roles: ["admin", "operator"],
+          roles: ["admin", "operator", "teacher"],
         },
         {
           icon: "el-icon-lx-location",
           index: "classroom",
           title: "教室信息管理",
-          roles: ["admin", "operator"],
+          roles: ["admin", "operator", "teacher"],
         },
         {
           icon: "el-icon-lx-addressbook",
@@ -89,7 +89,7 @@ export default {
               icon: "el-icon-lx-addressbook",
               index: "department",
               title: "院系信息管理",
-              roles: ["admin", "operator"],
+              roles: ["admin", "operator", "teacher"],
             },
             {
               icon: "el-icon-lx-people",
@@ -101,7 +101,7 @@ export default {
               icon: "el-icon-lx-group",
               title: "学生班级信息",
               index: "class",
-              roles: ["admin", "operator"],
+              roles: ["admin", "operator", "teacher"],
             },
           ]
         },

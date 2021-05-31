@@ -37,6 +37,7 @@
 <!--                                <el-dropdown-item>项目仓库</el-dropdown-item>-->
 <!--                            </a>-->
                             <el-dropdown-item> 登录用户名：{{username}}</el-dropdown-item>
+                            <el-dropdown-item divided v-if="user && user.associated_teacher"> 职工号：{{user.associated_teacher}}</el-dropdown-item>
                             <el-dropdown-item divided command="loginout">退出登录</el-dropdown-item>
                         </el-dropdown-menu>
                     </template>
@@ -46,6 +47,7 @@
     </div>
 </template>
 <script>
+import {getUser} from "../login_state";
 export default {
     data() {
         return {
@@ -61,7 +63,10 @@ export default {
         },
         collapse() {
             return this.$store.state.collapse;
-        }
+        },
+        user() {
+          return getUser();
+        },
     },
     methods: {
         // 用户名下拉菜单选择事件

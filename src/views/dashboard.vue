@@ -117,6 +117,7 @@
 <script>
 import {getTodos, setTodos} from "../todolist";
 import {getRoleStr} from "../roles";
+import {getUsername, getUser} from "../login_state";
 
 export default {
   name: "dashboard",
@@ -128,7 +129,7 @@ export default {
         clazzes: 10,
       },
       user: {
-        name: localStorage.getItem("ms_username"),
+        name: getUsername(),
         role: "系统管理员",
         lastTime: "2077-11-01",
         lastLoc: "某地",
@@ -179,7 +180,7 @@ export default {
     };
   },
   created() {
-    this.user = JSON.parse(localStorage.getItem("ms_userprofile"));
+    this.user = getUser();
     this.todoList = getTodos();
     if (this.todoList.length === 0) {
       this.todoList = this.default_todoList;

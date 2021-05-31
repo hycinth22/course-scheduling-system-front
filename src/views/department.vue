@@ -9,7 +9,7 @@
     </div>
     <div class="container">
       <div class="handle-box">
-        <el-button type="primary" icon="el-icon-lx-forward" @click="importVisible=true" class="mr10">导入Excel</el-button>
+        <el-button type="primary" icon="el-icon-lx-forward" @click="importVisible=true" class="mr10" v-if="canEdit">导入Excel</el-button>
         <el-input v-model="query.search" placeholder="编号/名称" class="handle-input mr10"></el-input>
         <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
       </div>
@@ -21,12 +21,12 @@
           header-cell-class-name="table-header"
           @selection-change="handleSelectionChange"
       >
-        <el-table-column type="selection" width="55" align="center"></el-table-column>
+        <el-table-column type="selection" width="55" align="center" v-if="canEdit"></el-table-column>
         <el-table-column prop="college.college_id" label="学院编号" width="105" align="center"></el-table-column>
         <el-table-column prop="college.college_name" label="学院名称" width="205"></el-table-column>
         <el-table-column prop="dept_id" label="系编号" width="75" align="center"></el-table-column>
         <el-table-column prop="dept_name" label="系名称" width="205"></el-table-column>
-        <el-table-column label="操作" width="180" align="center">
+        <el-table-column label="操作" width="180" align="center" v-if="canEdit">
           <template #default="scope">
             <el-popconfirm title="确定删除吗？" @confirm="handleDelete(scope.$index, scope.row)">
               <template #reference>
@@ -84,6 +84,7 @@ import {
 import {
   uploadCollegeExcelURL,
 } from "../api/college";
+import {getUser} from "../login_state";
 
 export default {
   data() {
@@ -131,7 +132,10 @@ export default {
     },
     uploadDepartmentExcelURL() {
       return uploadDepartmentExcelURL()
-    }
+    },
+    canEdit() {
+      return getUser().role!=='teacher';
+    },
   },
   methods: {
     getData() {

@@ -1,6 +1,7 @@
 import request from "../utils/request";
 import {getURL} from "../utils/request";
 
+const base = '/schedule';
 export const listSchedulesInSemester = (semester_date) => {
     return request({
         url: '/schedule',
@@ -88,3 +89,9 @@ export const getEvaluatorList = () => {
     });
 };
 
+export const getSelectedSchedule = () => {
+    return request({
+        url: base + '/selected',
+        method: 'get',
+    });
+};

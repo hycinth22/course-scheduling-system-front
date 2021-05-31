@@ -15,8 +15,8 @@
         <!--        </el-select>-->
         <el-input v-model="query.name" placeholder="编号/班级名" class="handle-input mr10"></el-input>
         <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
-        <el-button type="primary" icon="el-icon-lx-forward" @click="importVisible=true" class="mr10">导入Excel</el-button>
-        <el-button type="danger" icon="el-icon-delete" class="handle-del mr10" @click="delAllSelection">删除选中条目
+        <el-button type="primary" icon="el-icon-lx-forward" @click="importVisible=true" class="mr10" v-if="canEdit">导入Excel</el-button>
+        <el-button type="danger" icon="el-icon-delete" class="handle-del mr10" @click="delAllSelection" v-if="canEdit">删除选中条目
         </el-button>
 
       </div>
@@ -28,12 +28,12 @@
           header-cell-class-name="table-header"
           @selection-change="handleSelectionChange"
       >
-        <el-table-column type="selection" width="55" align="center"></el-table-column>
+        <el-table-column type="selection" width="65" align="center" v-if="canEdit"></el-table-column>
         <el-table-column prop="clazz_id" label="编号" width="85" align="center"></el-table-column>
-        <el-table-column prop="college.college_name" label="所属学院"></el-table-column>
+        <el-table-column prop="college.college_name"  width="205" label="所属学院"></el-table-column>
         <el-table-column prop="clazz_name" label="名称"></el-table-column>
 
-        <el-table-column label="操作" width="180" align="center">
+        <el-table-column label="操作" width="180" align="center" v-if="canEdit">
           <template #default="scope">
             <el-button
                 type="text"
@@ -110,6 +110,7 @@
 
 <script>
 import {deleteClazz, listClazzes, updateClazz, uploadClazzExcelURL} from "../api/clazz";
+import {getUser} from "../login_state";
 
 export default {
   data() {
@@ -140,7 +141,10 @@ export default {
   computed: {
     uploadExcelURL() {
       return uploadClazzExcelURL();
-    }
+    },
+    canEdit() {
+      return getUser().role!=='teacher';
+    },
   },
   methods: {
     getData() {
