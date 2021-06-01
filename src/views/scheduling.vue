@@ -421,10 +421,12 @@ export default {
       this.usingScheduleID = resp.selected_schedule;
       return resp.selected_semester;
     }).then(this.loadSchedulesList).then(() => {
-      this.query.scheduleID = this.usingScheduleID;
-      this.form.enabled = true;
-      return this.usingScheduleID;
-    }).then(this.loadSchedulesItems), this.loadEvaluators()]).then(() => {
+      if (this.usingScheduleID === 0) {
+        this.query.scheduleID = this.usingScheduleID;
+        this.form.enabled = true;
+        this.loadSchedulesItems(this.usingScheduleID);
+      }
+    }), this.loadEvaluators()]).then(() => {
       this.loading = false;
     });
   },

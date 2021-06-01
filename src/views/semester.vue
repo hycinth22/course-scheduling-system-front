@@ -68,10 +68,18 @@
     <el-dialog title="新增" v-model="addVisible" width="30%">
       <el-form ref="form" :model="form" label-width="70px">
         <el-form-item label="学期名称">
-          <el-input v-model="form.semester_name"  placeholder="请输入学期名称"></el-input>
+          <el-input v-model="form.semester_name" placeholder="请输入学期名称"></el-input>
         </el-form-item>
         <el-form-item label="开始日期">
-          <el-input v-model="form.start_date" placeholder="请输入开始日期（不可重复）"></el-input>
+<!--          <el-input v-model="form.start_date" placeholder="请输入开始日期（不可重复）"></el-input>-->
+          <el-date-picker
+              v-model="startDate"
+              type="date"
+              placeholder="请选择开始日期（不可重复）"
+              @change="form.start_date=convertDate(startDate)"
+              style="width:470px"
+          >
+          </el-date-picker>
         </el-form-item>
         <el-form-item label="周数">
           <el-input v-model.number="form.semester_weeks" placeholder="请输入学期周数"></el-input>
@@ -88,7 +96,14 @@
 </template>
 
 <script>
-import {getHiddenPastSemester, listSemesters, saveHiddenPastSemester, addSemester, updateSemester, deleteSemester} from "../api/semester";
+import {
+  getHiddenPastSemester,
+  listSemesters,
+  saveHiddenPastSemester,
+  addSemester,
+  updateSemester,
+  deleteSemester
+} from "../api/semester";
 
 export default {
   data() {
@@ -111,7 +126,7 @@ export default {
       addVisible: false,
       editVisible: false,
       pageTotal: 0,
-      form:         {
+      form: {
         "semester_name": "",
         "semester_weeks": 0,
         "start_date": ""
@@ -120,11 +135,12 @@ export default {
       id: -1,
       hidePast: false,
       loading: false,
+      startDate: null,
     };
   },
   created() {
     this.getData();
-    getHiddenPastSemester().then((resp)=>{
+    getHiddenPastSemester().then((resp) => {
       this.hidePast = resp.val;
     });
   },
@@ -140,6 +156,9 @@ export default {
     },
   },
   methods: {
+    convertDate(date) {
+      return date.getFullYear() + "/" + (date.getMonth() + 1) + "/" + date.getDate();
+    },
     handleToggleHidePast(newVal) {
       saveHiddenPastSemester(newVal);
       this.getData();
@@ -178,7 +197,7 @@ export default {
       this.multipleSelection = [];
     },
     handleAdd() {
-      this.form={};
+      this.form = {};
       this.addVisible = true;
     },
     // 编辑操作
@@ -188,13 +207,13 @@ export default {
       this.editVisible = true;
     },
     saveAdd() {
-      addSemester(this.form).then(this.getData).then(()=>{
+      addSemester(this.form).then(this.getData).then(() => {
         this.addVisible = false;
         this.$message.success(`新增成功`);
       })
     },
     saveEdit() {
-      updateSemester(this.form).then(this.getData).then(()=>{
+      updateSemester(this.form).then(this.getData).then(() => {
         this.editVisible = false;
         this.$message.success(`新增成功`);
       })
