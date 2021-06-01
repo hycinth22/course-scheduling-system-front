@@ -29,11 +29,11 @@
           第{{ semesterInfo.progress.cur }}周/共{{ semesterInfo.progress.total }}周
           <el-progress :percentage="(semesterInfo.progress.cur/semesterInfo.progress.total*100).toFixed(2)"
                        color="#42b983"></el-progress>
-          教室利用率
+          教室使用率
           <el-progress :percentage="semesterInfo.clazzroom_usage.toFixed(2)" color="#f1e05a"></el-progress>
-          教师平均每周课程数 {{ semesterInfo.teachersStats.avgLessons }}
+          教师平均每周课程数 {{ Math.round(semesterInfo.teachersStats.avgLessons) }}
           <el-progress :percentage="semesterInfo.teachersStats.percentage.toFixed(2)"></el-progress>
-          班级平均每周课程数 {{ semesterInfo.studentStats.avgLessons }}
+          班级平均每周课程数 {{ Math.round(semesterInfo.studentStats.avgLessons) }}
           <el-progress :percentage="semesterInfo.studentStats.percentage.toFixed(2)" color="#f56c6c"></el-progress>
         </el-card>
       </el-col>
@@ -118,6 +118,7 @@
 import {getTodos, setTodos} from "../todolist";
 import {getRoleStr} from "../roles";
 import {getUsername, getUser} from "../login_state";
+import {getSummary} from "../api/dashboard";
 
 export default {
   name: "dashboard",
@@ -185,6 +186,10 @@ export default {
     if (this.todoList.length === 0) {
       this.todoList = this.default_todoList;
     }
+    getSummary().then(resp=>{
+      this.counts = resp.counts;
+      this.semesterInfo = resp.semesterInfo;
+    });
   },
   watch: {
     todoList: {

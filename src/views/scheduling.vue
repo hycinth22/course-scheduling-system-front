@@ -453,6 +453,7 @@ export default {
           }
         });
         this.query.scheduleID = resp.schedule_id;
+        this.handleScheduleChanged(resp.schedule_id);
         this.loading = false;
         this.$message.success("新建方案成功，已选择新方案");
       });
